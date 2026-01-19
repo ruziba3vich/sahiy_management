@@ -122,6 +122,38 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int64) (*domain.Use
 	return user, nil
 }
 
+func (r *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*domain.User, error) {
+	query := `
+		SELECT id, department_id, section_id, schedule_id, role, phone, full_name, joined_at, created_at, updated_at, tg_chat_id, password_hash
+		FROM users
+		WHERE phone = $1
+	`
+
+	user := &domain.User{}
+	err := r.db.QueryRow(ctx, query, phone).Scan(
+		&user.ID,
+		&user.DepartmentID,
+		&user.SectionID,
+		&user.ScheduleID,
+		&user.Role,
+		&user.Phone,
+		&user.FullName,
+		&user.JoinedAt,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.TgChatID,
+		&user.PasswordHash,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *UserRepository) GetAllUsers(ctx context.Context) ([]*domain.User, error) {
 	query := `
 		SELECT id, department_id, section_id, schedule_id, role, phone, full_name, joined_at, created_at, updated_at, tg_chat_id, password_hash
