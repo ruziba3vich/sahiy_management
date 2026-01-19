@@ -171,9 +171,31 @@ func main() {
 	privileges.GET("/:id", middleware.RequirePrivilege(authService, "privileges", "read"), privHandler.GetByID)
 	privileges.PUT("/:id", middleware.RequirePrivilege(authService, "privileges", "update"), privHandler.Update)
 	privileges.DELETE("/:id", middleware.RequirePrivilege(authService, "privileges", "delete"), privHandler.Delete)
-	branchHandler.RegisterRoutes(api)
-	scheduleHandler.RegisterRoutes(api)
-	userActionHandler.RegisterRoutes(api)
+
+	// Branches - protected with RBAC
+	branches := protected.Group("/branches")
+	branches.POST("", middleware.RequirePrivilege(authService, "branches", "create"), branchHandler.Create)
+	branches.GET("", middleware.RequirePrivilege(authService, "branches", "read"), branchHandler.GetAll)
+	branches.GET("/:id", middleware.RequirePrivilege(authService, "branches", "read"), branchHandler.GetByID)
+	branches.PUT("/:id", middleware.RequirePrivilege(authService, "branches", "update"), branchHandler.Update)
+	branches.DELETE("/:id", middleware.RequirePrivilege(authService, "branches", "delete"), branchHandler.Delete)
+
+	// Schedules - protected with RBAC
+	schedules := protected.Group("/schedules")
+	schedules.POST("", middleware.RequirePrivilege(authService, "schedules", "create"), scheduleHandler.Create)
+	schedules.GET("", middleware.RequirePrivilege(authService, "schedules", "read"), scheduleHandler.GetAll)
+	schedules.GET("/:id", middleware.RequirePrivilege(authService, "schedules", "read"), scheduleHandler.GetByID)
+	schedules.PUT("/:id", middleware.RequirePrivilege(authService, "schedules", "update"), scheduleHandler.Update)
+	schedules.DELETE("/:id", middleware.RequirePrivilege(authService, "schedules", "delete"), scheduleHandler.Delete)
+
+	// User Actions - protected with RBAC
+	userActions := protected.Group("/user-actions")
+	userActions.POST("", middleware.RequirePrivilege(authService, "user-actions", "create"), userActionHandler.Create)
+	userActions.GET("", middleware.RequirePrivilege(authService, "user-actions", "read"), userActionHandler.GetAll)
+	userActions.GET("/:id", middleware.RequirePrivilege(authService, "user-actions", "read"), userActionHandler.GetByID)
+	userActions.PUT("/:id", middleware.RequirePrivilege(authService, "user-actions", "update"), userActionHandler.Update)
+	userActions.DELETE("/:id", middleware.RequirePrivilege(authService, "user-actions", "delete"), userActionHandler.Delete)
+
 	// Note: department/section/user/task routes are registered above with RBAC.
 
 	port := getEnv("PORT", "8098")
