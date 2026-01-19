@@ -9,7 +9,7 @@ type CreateTaskRequest struct {
 	Description string `json:"description" example:"Add OAuth2 login functionality"`
 	Priority    int    `json:"priority" binding:"required" example:"1"`
 	Deadline    int64  `json:"deadline" binding:"required" example:"1737363600"`
-	Status      int    `json:"status" binding:"required" example:"1"`
+	Status      *int   `json:"status" example:"1"`
 }
 
 type UpdateTaskRequest struct {
