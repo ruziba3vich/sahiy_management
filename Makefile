@@ -1,4 +1,8 @@
-.PHONY: migrate-create
+.PHONY: migrate-create swagger
+
+swagger:
+	@swag init -g cmd/api/main.go -o docs
+	@echo "Swagger docs generated in ./docs"
 
 migrate-create:
 ifndef name

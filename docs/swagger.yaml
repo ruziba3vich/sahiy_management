@@ -1,0 +1,203 @@
+basePath: /api/v1
+definitions:
+  dto.CreateDepartmentRequest:
+    properties:
+      name:
+        example: Engineering
+        type: string
+      status:
+        example: 1
+        type: integer
+    required:
+    - name
+    - status
+    type: object
+  dto.DepartmentResponse:
+    properties:
+      created_at:
+        example: 1737277200
+        type: integer
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Engineering
+        type: string
+      status:
+        example: 1
+        type: integer
+      updated_at:
+        example: 1737277200
+        type: integer
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        example: department not found
+        type: string
+    type: object
+  dto.UpdateDepartmentRequest:
+    properties:
+      name:
+        example: Engineering
+        type: string
+      status:
+        example: 1
+        type: integer
+    required:
+    - name
+    - status
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for managing departments in Sahiy Management system
+  title: Sahiy Management API
+  version: "1.0"
+paths:
+  /departments:
+    get:
+      description: Retrieve a list of all departments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.DepartmentResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all departments
+      tags:
+      - departments
+    post:
+      consumes:
+      - application/json
+      description: Create a new department with the provided name and status
+      parameters:
+      - description: Department data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DepartmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new department
+      tags:
+      - departments
+  /departments/{id}:
+    delete:
+      description: Delete a department by ID
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a department
+      tags:
+      - departments
+    get:
+      description: Retrieve a single department by its ID
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DepartmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a department by ID
+      tags:
+      - departments
+    put:
+      consumes:
+      - application/json
+      description: Update an existing department by ID
+      parameters:
+      - description: Department ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Department data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DepartmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a department
+      tags:
+      - departments
+swagger: "2.0"
