@@ -119,6 +119,225 @@ const docTemplate = `{
                 }
             }
         },
+        "/branches": {
+            "get": {
+                "description": "Retrieve a list of all branches",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Get all branches",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.BranchResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new branch with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Create a new branch",
+                "parameters": [
+                    {
+                        "description": "Branch data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/branches/{id}": {
+            "get": {
+                "description": "Retrieve a single branch by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Get a branch by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing branch by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Update a branch",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Branch data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a branch by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Delete a branch",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/departments": {
             "get": {
                 "description": "Retrieve a list of all departments",
@@ -685,6 +904,225 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules": {
+            "get": {
+                "description": "Retrieve a list of all schedules",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Get all schedules",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ScheduleResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new schedule with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Create a new schedule",
+                "parameters": [
+                    {
+                        "description": "Schedule data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedules/{id}": {
+            "get": {
+                "description": "Retrieve a single schedule by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Get a schedule by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing schedule by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Update a schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateScheduleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a schedule by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "schedules"
+                ],
+                "summary": "Delete a schedule",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Schedule ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -1566,6 +2004,225 @@ const docTemplate = `{
                 }
             }
         },
+        "/user-actions": {
+            "get": {
+                "description": "Retrieve a list of all user actions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get all user actions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserActionResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new user action with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Create a new user action",
+                "parameters": [
+                    {
+                        "description": "User action data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions/{id}": {
+            "get": {
+                "description": "Retrieve a single user action by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get a user action by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing user action by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Update a user action",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User action data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user action by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Delete a user action",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Retrieve a list of all users",
@@ -2014,6 +2671,74 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.BranchResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                }
+            }
+        },
+        "dto.CreateBranchRequest": {
+            "type": "object",
+            "required": [
+                "lat",
+                "long",
+                "name",
+                "radius"
+            ],
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.AssignPrivilegeRequest": {
             "type": "object",
             "required": [
@@ -2066,6 +2791,34 @@ const docTemplate = `{
                 "resource": {
                     "type": "string",
                     "example": "departments"
+                }
+            }
+        },
+        "dto.CreateScheduleRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "timezone",
+                "week_days"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Default"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
                 }
             }
         },
@@ -2160,6 +2913,45 @@ const docTemplate = `{
                     "example": "In Progress"
                 },
                 "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.CreateUserActionRequest": {
+            "type": "object",
+            "required": [
+                "come_status",
+                "started_at",
+                "user_id",
+                "visit_branch_id"
+            ],
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2325,6 +3117,54 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ScheduleDay": {
+            "type": "object",
+            "properties": {
+                "finish_at": {
+                    "type": "string",
+                    "example": "18:00"
+                },
+                "start_at": {
+                    "type": "string",
+                    "example": "09:00"
+                }
+            }
+        },
+        "dto.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Default"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "updated_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
+                }
+            }
+        },
         "dto.SectionResponse": {
             "type": "object",
             "properties": {
@@ -2441,6 +3281,38 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateBranchRequest": {
+            "type": "object",
+            "required": [
+                "lat",
+                "long",
+                "name",
+                "radius",
+                "status"
+            ],
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.UpdateDepartmentRequest": {
             "type": "object",
             "required": [
@@ -2481,6 +3353,35 @@ const docTemplate = `{
                 "resource": {
                     "type": "string",
                     "example": "departments"
+                }
+            }
+        },
+        "dto.UpdateScheduleRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "status",
+                "timezone",
+                "week_days"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Default"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
                 }
             }
         },
@@ -2584,6 +3485,45 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateUserActionRequest": {
+            "type": "object",
+            "required": [
+                "come_status",
+                "started_at",
+                "user_id",
+                "visit_branch_id"
+            ],
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.UpdateUserRequest": {
             "type": "object",
             "required": [
@@ -2635,6 +3575,43 @@ const docTemplate = `{
                     }
                 },
                 "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UserActionResponse": {
+            "type": "object",
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2703,7 +3680,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "localhost:8098",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Sahiy Management API",

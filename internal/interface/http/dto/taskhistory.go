@@ -5,7 +5,7 @@ import domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskhisto
 type CreateTaskHistoryRequest struct {
 	TaskID int64 `json:"task_id" binding:"required" example:"1"`
 	UserID int64 `json:"user_id" binding:"required" example:"1"`
-	Status int   `json:"status" binding:"required" example:"1"`
+	Status *int  `json:"status" example:"1"`
 }
 
 type UpdateTaskHistoryRequest struct {
