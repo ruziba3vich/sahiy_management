@@ -4,7 +4,6 @@ import (
 	"github.com/ruziba3vich/sahiy_management/internal/application/auth"
 	"github.com/ruziba3vich/sahiy_management/internal/application/branch"
 	"github.com/ruziba3vich/sahiy_management/internal/application/department"
-	"github.com/ruziba3vich/sahiy_management/internal/application/privilege"
 	"github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	"github.com/ruziba3vich/sahiy_management/internal/application/section"
 	"github.com/ruziba3vich/sahiy_management/internal/application/task"
@@ -26,7 +25,6 @@ type Service struct {
 	taskStatus  *taskstatus.Service
 	task        *task.Service
 	taskHistory *taskhistory.Service
-	privilege   *privilege.Service
 	auth        auth.Service
 }
 
@@ -41,10 +39,8 @@ func New(repo *infrastructure.Repository, cfg *config.Config) *Service {
 		taskStatus:  taskstatus.NewService(repo.GetTaskStatus()),
 		task:        task.NewService(repo.GetTask()),
 		taskHistory: taskhistory.NewService(repo.GetTaskHistory()),
-		privilege:   privilege.NewService(repo.GetPrivilages()),
 		auth: *auth.NewService(
 			repo.GetUser(),
-			repo.GetPrivilages(),
 			cfg.JWTSecret,
 			cfg.JWTExpiryHours,
 		),
@@ -85,10 +81,6 @@ func (r *Service) GetTaskHistory() *taskhistory.Service {
 
 func (r *Service) GetTask() *task.Service {
 	return r.task
-}
-
-func (r *Service) GetPrivilages() *privilege.Service {
-	return r.privilege
 }
 
 func (r *Service) GetAuth() *auth.Service {

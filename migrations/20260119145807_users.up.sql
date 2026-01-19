@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS "users" (
 );
 
 -- Super Admin Seed (Role 99 = SuperAdmin)
+-- Credentials:
+--   Phone: +998901112233
+--   Password: SuperSecure2026!
 INSERT INTO "users" (
     "department_id", "section_id", "schedule_id", "role", "phone", "full_name",
     "joined_at", "created_at", "updated_at", "tg_chat_id", "password_hash"
