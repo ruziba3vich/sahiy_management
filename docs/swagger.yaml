@@ -24,6 +24,36 @@ definitions:
     - department_id
     - name
     type: object
+  dto.CreateTaskRequest:
+    properties:
+      deadline:
+        example: 1737363600
+        type: integer
+      description:
+        example: Add OAuth2 login functionality
+        type: string
+      parent_id:
+        example: 1
+        type: integer
+      priority:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      status:
+        example: 1
+        type: integer
+      title:
+        example: Implement login feature
+        type: string
+    required:
+    - deadline
+    - priority
+    - section_id
+    - status
+    - title
+    type: object
   dto.CreateTaskStatusRequest:
     properties:
       name:
@@ -113,6 +143,39 @@ definitions:
         example: 1737277200
         type: integer
     type: object
+  dto.TaskResponse:
+    properties:
+      created_at:
+        example: 1737277200
+        type: integer
+      deadline:
+        example: 1737363600
+        type: integer
+      description:
+        example: Add OAuth2 login functionality
+        type: string
+      id:
+        example: 1
+        type: integer
+      parent_id:
+        example: 1
+        type: integer
+      priority:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      status:
+        example: 1
+        type: integer
+      title:
+        example: Implement login feature
+        type: string
+      updated_at:
+        example: 1737277200
+        type: integer
+    type: object
   dto.TaskStatusResponse:
     properties:
       id:
@@ -148,6 +211,36 @@ definitions:
     required:
     - department_id
     - name
+    type: object
+  dto.UpdateTaskRequest:
+    properties:
+      deadline:
+        example: 1737363600
+        type: integer
+      description:
+        example: Add OAuth2 login functionality
+        type: string
+      parent_id:
+        example: 1
+        type: integer
+      priority:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      status:
+        example: 1
+        type: integer
+      title:
+        example: Implement login feature
+        type: string
+    required:
+    - deadline
+    - priority
+    - section_id
+    - status
+    - title
     type: object
   dto.UpdateTaskStatusRequest:
     properties:
@@ -670,6 +763,151 @@ paths:
       summary: Update a task status
       tags:
       - task-statuses
+  /tasks:
+    get:
+      description: Retrieve a list of all tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TaskResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task with the provided data
+      parameters:
+      - description: Task data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      description: Delete a task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      description: Retrieve a single task by its ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a task by ID
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update an existing task by ID
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a task
+      tags:
+      - tasks
   /users:
     get:
       description: Retrieve a list of all users
