@@ -1,8 +1,8 @@
-.PHONY: migrate
+.PHONY: migrate-create
 
-migrate:
+migrate-create:
 ifndef name
-	$(error name is required. Usage: make migrate name=create_users_table)
+	$(error name is required. Usage: make migrate-create name=create_users_table)
 endif
 	@mkdir -p ./migrations
 	@timestamp=$$(date +%Y%m%d%H%M%S); \
