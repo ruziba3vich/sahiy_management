@@ -4,7 +4,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/branch"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/department"
-	"github.com/ruziba3vich/sahiy_management/internal/domain/privilege"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/schedule"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/section"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/task"
@@ -25,7 +24,6 @@ type Repository struct {
 	taskStatus  taskstatus.Repository
 	taskHistory taskhistory.Repository
 	tasks       task.Repository
-	privilages  privilege.Repository
 }
 
 func New(db *pgxpool.Pool) *Repository {
@@ -39,7 +37,6 @@ func New(db *pgxpool.Pool) *Repository {
 		taskStatus:  postgres.NewTaskStatusRepository(db),
 		tasks:       postgres.NewTaskRepository(db),
 		taskHistory: postgres.NewTaskHistoryRepository(db),
-		privilages:  postgres.NewPrivilegeRepository(db),
 	}
 }
 
@@ -77,8 +74,4 @@ func (r *Repository) GetTaskHistory() taskhistory.Repository {
 
 func (r *Repository) GetTask() task.Repository {
 	return r.tasks
-}
-
-func (r *Repository) GetPrivilages() privilege.Repository {
-	return r.privilages
 }
