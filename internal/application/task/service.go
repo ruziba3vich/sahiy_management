@@ -2,8 +2,8 @@ package task
 
 import (
 	"context"
-	"database/sql"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
 )
 
@@ -16,9 +16,9 @@ func NewService(repo domain.Repository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, parentID *int64, sectionID int64, title, description string, priority int, deadline int64, status int) (*domain.Task, error) {
-	var parent sql.NullInt64
+	var parent pgtype.Int8
 	if parentID != nil {
-		parent = sql.NullInt64{Int64: *parentID, Valid: true}
+		parent = pgtype.Int8{Int64: *parentID, Valid: true}
 	}
 
 	task := domain.NewTask(parent, sectionID, title, description, priority, deadline, status)
@@ -31,9 +31,9 @@ func (s *Service) Update(ctx context.Context, id int64, parentID *int64, section
 		return nil, err
 	}
 
-	var parent sql.NullInt64
+	var parent pgtype.Int8
 	if parentID != nil {
-		parent = sql.NullInt64{Int64: *parentID, Valid: true}
+		parent = pgtype.Int8{Int64: *parentID, Valid: true}
 	}
 
 	task.Update(parent, sectionID, title, description, priority, deadline, status)

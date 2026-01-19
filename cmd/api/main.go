@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"strconv"
@@ -27,6 +28,8 @@ import (
 // @host            localhost:8080
 // @BasePath        /api/v1
 func main() {
+	ctx := context.Background()
+
 	dbPort, _ := strconv.Atoi(getEnv("DB_PORT", "5432"))
 
 	dbConfig := database.Config{
@@ -38,7 +41,7 @@ func main() {
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 
-	db, err := database.NewPostgresConnection(&dbConfig)
+	db, err := database.NewPostgresConnection(ctx, &dbConfig)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}

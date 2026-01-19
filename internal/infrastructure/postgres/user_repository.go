@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/user"
 )
 
 var ErrUserNotFound = errors.New("user not found")
 
 type UserRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewUserRepository(db *sql.DB) domain.Repository {
+func NewUserRepository(db *pgxpool.Pool) domain.Repository {
 	return &UserRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) (*do
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRow(ctx, query,
 		user.DepartmentID,
 		user.SectionID,
 		user.ScheduleID,
@@ -52,7 +53,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) (*do
 		WHERE id = $9
 	`
 
-	result, err := r.db.ExecContext(ctx, query,
+	result, err := r.db.Exec(ctx, query,
 		user.DepartmentID,
 		user.SectionID,
 		user.ScheduleID,
@@ -67,11 +68,7 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) (*do
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrUserNotFound
 	}
 
@@ -81,16 +78,12 @@ func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) (*do
 func (r *UserRepository) DeleteUser(ctx context.Context, id int64) error {
 	query := `DELETE FROM users WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrUserNotFound
 	}
 
@@ -105,7 +98,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int64) (*domain.Use
 	`
 
 	user := &domain.User{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&user.ID,
 		&user.DepartmentID,
 		&user.SectionID,
@@ -120,7 +113,7 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int64) (*domain.Use
 		&user.PasswordHash,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrUserNotFound
 		}
 		return nil, err
@@ -136,7 +129,7 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]*domain.User, error
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

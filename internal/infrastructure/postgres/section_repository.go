@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/section"
 )
 
 var ErrSectionNotFound = errors.New("section not found")
 
 type SectionRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewSectionRepository(db *sql.DB) domain.Repository {
+func NewSectionRepository(db *pgxpool.Pool) domain.Repository {
 	return &SectionRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *SectionRepository) CreateSection(ctx context.Context, sec *domain.Secti
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRow(ctx, query,
 		sec.DepartmentID,
 		sec.Name,
 		sec.CreatedAt,
@@ -45,7 +46,7 @@ func (r *SectionRepository) UpdateSection(ctx context.Context, sec *domain.Secti
 		WHERE id = $4
 	`
 
-	result, err := r.db.ExecContext(ctx, query,
+	result, err := r.db.Exec(ctx, query,
 		sec.DepartmentID,
 		sec.Name,
 		sec.UpdatedAt,
@@ -55,11 +56,7 @@ func (r *SectionRepository) UpdateSection(ctx context.Context, sec *domain.Secti
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrSectionNotFound
 	}
 
@@ -69,16 +66,12 @@ func (r *SectionRepository) UpdateSection(ctx context.Context, sec *domain.Secti
 func (r *SectionRepository) DeleteSection(ctx context.Context, id int64) error {
 	query := `DELETE FROM sections WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrSectionNotFound
 	}
 
@@ -93,7 +86,7 @@ func (r *SectionRepository) GetSectionByID(ctx context.Context, id int64) (*doma
 	`
 
 	sec := &domain.Section{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&sec.ID,
 		&sec.DepartmentID,
 		&sec.Name,
@@ -101,7 +94,7 @@ func (r *SectionRepository) GetSectionByID(ctx context.Context, id int64) (*doma
 		&sec.UpdatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrSectionNotFound
 		}
 		return nil, err
@@ -117,7 +110,7 @@ func (r *SectionRepository) GetAllSections(ctx context.Context) ([]*domain.Secti
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
