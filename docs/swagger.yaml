@@ -12,6 +12,18 @@ definitions:
     - name
     - status
     type: object
+  dto.CreateSectionRequest:
+    properties:
+      department_id:
+        example: 1
+        type: integer
+      name:
+        example: Backend Development
+        type: string
+    required:
+    - department_id
+    - name
+    type: object
   dto.DepartmentResponse:
     properties:
       created_at:
@@ -36,6 +48,24 @@ definitions:
         example: department not found
         type: string
     type: object
+  dto.SectionResponse:
+    properties:
+      created_at:
+        example: 1737277200
+        type: integer
+      department_id:
+        example: 1
+        type: integer
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Backend Development
+        type: string
+      updated_at:
+        example: 1737277200
+        type: integer
+    type: object
   dto.UpdateDepartmentRequest:
     properties:
       name:
@@ -47,6 +77,18 @@ definitions:
     required:
     - name
     - status
+    type: object
+  dto.UpdateSectionRequest:
+    properties:
+      department_id:
+        example: 1
+        type: integer
+      name:
+        example: Backend Development
+        type: string
+    required:
+    - department_id
+    - name
     type: object
 host: localhost:8080
 info:
@@ -200,4 +242,149 @@ paths:
       summary: Update a department
       tags:
       - departments
+  /sections:
+    get:
+      description: Retrieve a list of all sections
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.SectionResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all sections
+      tags:
+      - sections
+    post:
+      consumes:
+      - application/json
+      description: Create a new section with the provided department_id and name
+      parameters:
+      - description: Section data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSectionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.SectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new section
+      tags:
+      - sections
+  /sections/{id}:
+    delete:
+      description: Delete a section by ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a section
+      tags:
+      - sections
+    get:
+      description: Retrieve a single section by its ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a section by ID
+      tags:
+      - sections
+    put:
+      consumes:
+      - application/json
+      description: Update an existing section by ID
+      parameters:
+      - description: Section ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Section data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSectionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SectionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a section
+      tags:
+      - sections
 swagger: "2.0"
