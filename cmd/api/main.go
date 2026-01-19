@@ -9,9 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	appAuth "github.com/ruziba3vich/sahiy_management/internal/application/auth"
 	appBranch "github.com/ruziba3vich/sahiy_management/internal/application/branch"
-	appBranch "github.com/ruziba3vich/sahiy_management/internal/application/branch"
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
-	appSchedule "github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	appPriv "github.com/ruziba3vich/sahiy_management/internal/application/privilege"
 	appSchedule "github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
@@ -66,25 +64,10 @@ func main() {
 	// Repositories
 	deptRepo := postgres.NewDepartmentRepository(db)
 	secRepo := postgres.NewSectionRepository(db)
-	secService := appSec.NewService(secRepo)
-	secHandler := handler.NewSectionHandler(secService)
-
 	branchRepo := postgres.NewBranchRepository(db)
-	branchService := appBranch.NewService(branchRepo)
-	branchHandler := handler.NewBranchHandler(branchService)
-
 	scheduleRepo := postgres.NewScheduleRepository(db)
-	scheduleService := appSchedule.NewService(scheduleRepo)
-	scheduleHandler := handler.NewScheduleHandler(scheduleService)
-
 	userRepo := postgres.NewUserRepository(db)
-	userService := appUser.NewService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
-
 	userActionRepo := postgres.NewUserActionRepository(db)
-	userActionService := appUserAction.NewService(userActionRepo)
-	userActionHandler := handler.NewUserActionHandler(userActionService)
-
 	tsRepo := postgres.NewTaskStatusRepository(db)
 	taskRepo := postgres.NewTaskRepository(db)
 	thRepo := postgres.NewTaskHistoryRepository(db)
@@ -93,7 +76,10 @@ func main() {
 	// Services
 	deptService := appDept.NewService(deptRepo)
 	secService := appSec.NewService(secRepo)
+	branchService := appBranch.NewService(branchRepo)
+	scheduleService := appSchedule.NewService(scheduleRepo)
 	userService := appUser.NewService(userRepo)
+	userActionService := appUserAction.NewService(userActionRepo)
 	tsService := appTS.NewService(tsRepo)
 	taskService := appTask.NewService(taskRepo)
 	thService := appTH.NewService(thRepo)
@@ -103,7 +89,10 @@ func main() {
 	// Handlers
 	deptHandler := handler.NewDepartmentHandler(deptService)
 	secHandler := handler.NewSectionHandler(secService)
+	branchHandler := handler.NewBranchHandler(branchService)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
 	userHandler := handler.NewUserHandler(userService)
+	userActionHandler := handler.NewUserActionHandler(userActionService)
 	tsHandler := handler.NewTaskStatusHandler(tsService)
 	taskHandler := handler.NewTaskHandler(taskService)
 	thHandler := handler.NewTaskHistoryHandler(thService)
