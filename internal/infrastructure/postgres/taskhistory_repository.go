@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskhistory"
 )
 
 var ErrTaskHistoryNotFound = errors.New("task history not found")
 
 type TaskHistoryRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewTaskHistoryRepository(db *sql.DB) domain.Repository {
+func NewTaskHistoryRepository(db *pgxpool.Pool) domain.Repository {
 	return &TaskHistoryRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *TaskHistoryRepository) CreateTaskHistory(ctx context.Context, th *domai
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRow(ctx, query,
 		th.TaskID,
 		th.UserID,
 		th.Status,
@@ -46,7 +47,7 @@ func (r *TaskHistoryRepository) UpdateTaskHistory(ctx context.Context, th *domai
 		WHERE id = $6
 	`
 
-	result, err := r.db.ExecContext(ctx, query,
+	result, err := r.db.Exec(ctx, query,
 		th.TaskID,
 		th.UserID,
 		th.Status,
@@ -58,11 +59,7 @@ func (r *TaskHistoryRepository) UpdateTaskHistory(ctx context.Context, th *domai
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrTaskHistoryNotFound
 	}
 
@@ -72,16 +69,12 @@ func (r *TaskHistoryRepository) UpdateTaskHistory(ctx context.Context, th *domai
 func (r *TaskHistoryRepository) DeleteTaskHistory(ctx context.Context, id int64) error {
 	query := `DELETE FROM task_histories WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrTaskHistoryNotFound
 	}
 
@@ -96,7 +89,7 @@ func (r *TaskHistoryRepository) GetTaskHistoryByID(ctx context.Context, id int64
 	`
 
 	th := &domain.TaskHistory{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&th.ID,
 		&th.TaskID,
 		&th.UserID,
@@ -105,7 +98,7 @@ func (r *TaskHistoryRepository) GetTaskHistoryByID(ctx context.Context, id int64
 		&th.FinishedAt,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrTaskHistoryNotFound
 		}
 		return nil, err
@@ -121,7 +114,7 @@ func (r *TaskHistoryRepository) GetAllTaskHistories(ctx context.Context) ([]*dom
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

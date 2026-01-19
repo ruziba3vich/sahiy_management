@@ -1,13 +1,14 @@
 package task
 
 import (
-	"database/sql"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Task struct {
 	ID          int64
-	ParentID    sql.NullInt64
+	ParentID    pgtype.Int8
 	SectionID   int64
 	Title       string
 	Description string
@@ -18,7 +19,7 @@ type Task struct {
 	UpdatedAt   int64
 }
 
-func NewTask(parentID sql.NullInt64, sectionID int64, title, description string, priority int, deadline int64, status int) *Task {
+func NewTask(parentID pgtype.Int8, sectionID int64, title, description string, priority int, deadline int64, status int) *Task {
 	now := time.Now().Unix()
 	return &Task{
 		ParentID:    parentID,
@@ -33,7 +34,7 @@ func NewTask(parentID sql.NullInt64, sectionID int64, title, description string,
 	}
 }
 
-func (t *Task) Update(parentID sql.NullInt64, sectionID int64, title, description string, priority int, deadline int64, status int) {
+func (t *Task) Update(parentID pgtype.Int8, sectionID int64, title, description string, priority int, deadline int64, status int) {
 	t.ParentID = parentID
 	t.SectionID = sectionID
 	t.Title = title
