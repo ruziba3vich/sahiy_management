@@ -453,6 +453,225 @@ const docTemplate = `{
                 }
             }
         },
+        "/task-histories": {
+            "get": {
+                "description": "Retrieve a list of all task histories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Get all task histories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.TaskHistoryResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new task history entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Create a new task history",
+                "parameters": [
+                    {
+                        "description": "Task history data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateTaskHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task-histories/{id}": {
+            "get": {
+                "description": "Retrieve a single task history by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Get a task history by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task history ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing task history by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Update a task history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task history ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Task history data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateTaskHistoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a task history by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Delete a task history",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task history ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/task-statuses": {
             "get": {
                 "description": "Retrieve a list of all task statuses",
@@ -1146,6 +1365,28 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateTaskHistoryRequest": {
+            "type": "object",
+            "required": [
+                "status",
+                "task_id",
+                "user_id"
+            ],
+            "properties": {
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "task_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.CreateTaskRequest": {
             "type": "object",
             "required": [
@@ -1308,6 +1549,35 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.TaskHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737363600
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "task_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.TaskResponse": {
             "type": "object",
             "properties": {
@@ -1401,6 +1671,32 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "Backend Development"
+                }
+            }
+        },
+        "dto.UpdateTaskHistoryRequest": {
+            "type": "object",
+            "required": [
+                "status",
+                "task_id",
+                "user_id"
+            ],
+            "properties": {
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737363600
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "task_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

@@ -9,6 +9,7 @@ import (
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
 	appTask "github.com/ruziba3vich/sahiy_management/internal/application/task"
+	appTH "github.com/ruziba3vich/sahiy_management/internal/application/taskhistory"
 	appTS "github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
 	appUser "github.com/ruziba3vich/sahiy_management/internal/application/user"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
@@ -63,6 +64,10 @@ func main() {
 	taskService := appTask.NewService(taskRepo)
 	taskHandler := handler.NewTaskHandler(taskService)
 
+	thRepo := postgres.NewTaskHistoryRepository(db)
+	thService := appTH.NewService(thRepo)
+	thHandler := handler.NewTaskHistoryHandler(thService)
+
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -73,6 +78,7 @@ func main() {
 	userHandler.RegisterRoutes(api)
 	tsHandler.RegisterRoutes(api)
 	taskHandler.RegisterRoutes(api)
+	thHandler.RegisterRoutes(api)
 
 	port := getEnv("PORT", "8080")
 	log.Printf("Server starting on port %s", port)
