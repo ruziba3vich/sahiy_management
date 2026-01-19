@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
+	appTS "github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
 	appUser "github.com/ruziba3vich/sahiy_management/internal/application/user"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/handler"
@@ -53,6 +54,10 @@ func main() {
 	userService := appUser.NewService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
 
+	tsRepo := postgres.NewTaskStatusRepository(db)
+	tsService := appTS.NewService(tsRepo)
+	tsHandler := handler.NewTaskStatusHandler(tsService)
+
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -61,6 +66,7 @@ func main() {
 	deptHandler.RegisterRoutes(api)
 	secHandler.RegisterRoutes(api)
 	userHandler.RegisterRoutes(api)
+	tsHandler.RegisterRoutes(api)
 
 	port := getEnv("PORT", "8080")
 	log.Printf("Server starting on port %s", port)
