@@ -24,6 +24,22 @@ definitions:
     - department_id
     - name
     type: object
+  dto.CreateTaskHistoryRequest:
+    properties:
+      status:
+        example: 1
+        type: integer
+      task_id:
+        example: 1
+        type: integer
+      user_id:
+        example: 1
+        type: integer
+    required:
+    - status
+    - task_id
+    - user_id
+    type: object
   dto.CreateTaskRequest:
     properties:
       deadline:
@@ -143,6 +159,27 @@ definitions:
         example: 1737277200
         type: integer
     type: object
+  dto.TaskHistoryResponse:
+    properties:
+      finished_at:
+        example: 1737363600
+        type: integer
+      id:
+        example: 1
+        type: integer
+      started_at:
+        example: 1737277200
+        type: integer
+      status:
+        example: 1
+        type: integer
+      task_id:
+        example: 1
+        type: integer
+      user_id:
+        example: 1
+        type: integer
+    type: object
   dto.TaskResponse:
     properties:
       created_at:
@@ -211,6 +248,25 @@ definitions:
     required:
     - department_id
     - name
+    type: object
+  dto.UpdateTaskHistoryRequest:
+    properties:
+      finished_at:
+        example: 1737363600
+        type: integer
+      status:
+        example: 1
+        type: integer
+      task_id:
+        example: 1
+        type: integer
+      user_id:
+        example: 1
+        type: integer
+    required:
+    - status
+    - task_id
+    - user_id
     type: object
   dto.UpdateTaskRequest:
     properties:
@@ -618,6 +674,151 @@ paths:
       summary: Update a section
       tags:
       - sections
+  /task-histories:
+    get:
+      description: Retrieve a list of all task histories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TaskHistoryResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all task histories
+      tags:
+      - task-histories
+    post:
+      consumes:
+      - application/json
+      description: Create a new task history entry
+      parameters:
+      - description: Task history data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTaskHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TaskHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new task history
+      tags:
+      - task-histories
+  /task-histories/{id}:
+    delete:
+      description: Delete a task history by ID
+      parameters:
+      - description: Task history ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a task history
+      tags:
+      - task-histories
+    get:
+      description: Retrieve a single task history by its ID
+      parameters:
+      - description: Task history ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a task history by ID
+      tags:
+      - task-histories
+    put:
+      consumes:
+      - application/json
+      description: Update an existing task history by ID
+      parameters:
+      - description: Task history ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task history data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTaskHistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a task history
+      tags:
+      - task-histories
   /task-statuses:
     get:
       description: Retrieve a list of all task statuses
