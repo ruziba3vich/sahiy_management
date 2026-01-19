@@ -8,13 +8,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	appAuth "github.com/ruziba3vich/sahiy_management/internal/application/auth"
+	appBranch "github.com/ruziba3vich/sahiy_management/internal/application/branch"
+	appBranch "github.com/ruziba3vich/sahiy_management/internal/application/branch"
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
+	appSchedule "github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	appPriv "github.com/ruziba3vich/sahiy_management/internal/application/privilege"
+	appSchedule "github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
 	appTask "github.com/ruziba3vich/sahiy_management/internal/application/task"
 	appTH "github.com/ruziba3vich/sahiy_management/internal/application/taskhistory"
 	appTS "github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
 	appUser "github.com/ruziba3vich/sahiy_management/internal/application/user"
+	appUserAction "github.com/ruziba3vich/sahiy_management/internal/application/useraction"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/handler"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/middleware"
@@ -61,7 +66,25 @@ func main() {
 	// Repositories
 	deptRepo := postgres.NewDepartmentRepository(db)
 	secRepo := postgres.NewSectionRepository(db)
+	secService := appSec.NewService(secRepo)
+	secHandler := handler.NewSectionHandler(secService)
+
+	branchRepo := postgres.NewBranchRepository(db)
+	branchService := appBranch.NewService(branchRepo)
+	branchHandler := handler.NewBranchHandler(branchService)
+
+	scheduleRepo := postgres.NewScheduleRepository(db)
+	scheduleService := appSchedule.NewService(scheduleRepo)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+
 	userRepo := postgres.NewUserRepository(db)
+	userService := appUser.NewService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
+
+	userActionRepo := postgres.NewUserActionRepository(db)
+	userActionService := appUserAction.NewService(userActionRepo)
+	userActionHandler := handler.NewUserActionHandler(userActionService)
+
 	tsRepo := postgres.NewTaskStatusRepository(db)
 	taskRepo := postgres.NewTaskRepository(db)
 	thRepo := postgres.NewTaskHistoryRepository(db)
@@ -159,6 +182,15 @@ func main() {
 	privileges.GET("/:id", middleware.RequirePrivilege(authService, "privileges", "read"), privHandler.GetByID)
 	privileges.PUT("/:id", middleware.RequirePrivilege(authService, "privileges", "update"), privHandler.Update)
 	privileges.DELETE("/:id", middleware.RequirePrivilege(authService, "privileges", "delete"), privHandler.Delete)
+	deptHandler.RegisterRoutes(api)
+	secHandler.RegisterRoutes(api)
+	branchHandler.RegisterRoutes(api)
+	scheduleHandler.RegisterRoutes(api)
+	userHandler.RegisterRoutes(api)
+	userActionHandler.RegisterRoutes(api)
+	tsHandler.RegisterRoutes(api)
+	taskHandler.RegisterRoutes(api)
+	thHandler.RegisterRoutes(api)
 
 	port := getEnv("PORT", "8080")
 	log.Printf("Server starting on port %s", port)
