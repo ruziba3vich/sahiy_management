@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
+	appUser "github.com/ruziba3vich/sahiy_management/internal/application/user"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/handler"
 	"github.com/ruziba3vich/sahiy_management/pkg/database"
@@ -34,7 +35,7 @@ func main() {
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 
-	db, err := database.NewPostgresConnection(dbConfig)
+	db, err := database.NewPostgresConnection(&dbConfig)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
@@ -48,6 +49,10 @@ func main() {
 	secService := appSec.NewService(secRepo)
 	secHandler := handler.NewSectionHandler(secService)
 
+	userRepo := postgres.NewUserRepository(db)
+	userService := appUser.NewService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
+
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -55,6 +60,7 @@ func main() {
 	api := r.Group("/api/v1")
 	deptHandler.RegisterRoutes(api)
 	secHandler.RegisterRoutes(api)
+	userHandler.RegisterRoutes(api)
 
 	port := getEnv("PORT", "8080")
 	log.Printf("Server starting on port %s", port)
