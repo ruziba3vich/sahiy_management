@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/department"
 )
 
 var ErrDepartmentNotFound = errors.New("department not found")
 
 type DepartmentRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewDepartmentRepository(db *sql.DB) domain.Repository {
+func NewDepartmentRepository(db *pgxpool.Pool) domain.Repository {
 	return &DepartmentRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *DepartmentRepository) CreateDepartment(ctx context.Context, dept *domai
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRow(ctx, query,
 		dept.Name,
 		dept.Status,
 		dept.CreatedAt,
@@ -45,7 +46,7 @@ func (r *DepartmentRepository) UpdateDepartment(ctx context.Context, dept *domai
 		WHERE id = $4
 	`
 
-	result, err := r.db.ExecContext(ctx, query,
+	result, err := r.db.Exec(ctx, query,
 		dept.Name,
 		dept.Status,
 		dept.UpdatedAt,
@@ -55,11 +56,7 @@ func (r *DepartmentRepository) UpdateDepartment(ctx context.Context, dept *domai
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrDepartmentNotFound
 	}
 
@@ -69,16 +66,12 @@ func (r *DepartmentRepository) UpdateDepartment(ctx context.Context, dept *domai
 func (r *DepartmentRepository) DeleteDepartment(ctx context.Context, id int64) error {
 	query := `DELETE FROM departments WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrDepartmentNotFound
 	}
 
@@ -93,7 +86,7 @@ func (r *DepartmentRepository) GetDepartmentByID(ctx context.Context, id int64) 
 	`
 
 	dept := &domain.Department{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&dept.ID,
 		&dept.Name,
 		&dept.Status,
@@ -101,7 +94,7 @@ func (r *DepartmentRepository) GetDepartmentByID(ctx context.Context, id int64) 
 		&dept.UpdatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrDepartmentNotFound
 		}
 		return nil, err
@@ -117,7 +110,7 @@ func (r *DepartmentRepository) GetAllDepartments(ctx context.Context) ([]*domain
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

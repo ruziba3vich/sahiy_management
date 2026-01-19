@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskstatus"
 )
 
 var ErrTaskStatusNotFound = errors.New("task status not found")
 
 type TaskStatusRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewTaskStatusRepository(db *sql.DB) domain.Repository {
+func NewTaskStatusRepository(db *pgxpool.Pool) domain.Repository {
 	return &TaskStatusRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *TaskStatusRepository) CreateTaskStatus(ctx context.Context, ts *domain.
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query, ts.Name, ts.Type).Scan(&ts.ID)
+	err := r.db.QueryRow(ctx, query, ts.Name, ts.Type).Scan(&ts.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -40,16 +41,12 @@ func (r *TaskStatusRepository) UpdateTaskStatus(ctx context.Context, ts *domain.
 		WHERE id = $3
 	`
 
-	result, err := r.db.ExecContext(ctx, query, ts.Name, ts.Type, ts.ID)
+	result, err := r.db.Exec(ctx, query, ts.Name, ts.Type, ts.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrTaskStatusNotFound
 	}
 
@@ -59,16 +56,12 @@ func (r *TaskStatusRepository) UpdateTaskStatus(ctx context.Context, ts *domain.
 func (r *TaskStatusRepository) DeleteTaskStatus(ctx context.Context, id int64) error {
 	query := `DELETE FROM task_statuses WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrTaskStatusNotFound
 	}
 
@@ -83,9 +76,9 @@ func (r *TaskStatusRepository) GetTaskStatusByID(ctx context.Context, id int64) 
 	`
 
 	ts := &domain.TaskStatus{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&ts.ID, &ts.Name, &ts.Type)
+	err := r.db.QueryRow(ctx, query, id).Scan(&ts.ID, &ts.Name, &ts.Type)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrTaskStatusNotFound
 		}
 		return nil, err
@@ -101,7 +94,7 @@ func (r *TaskStatusRepository) GetAllTaskStatuses(ctx context.Context) ([]*domai
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}
