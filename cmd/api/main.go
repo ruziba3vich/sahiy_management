@@ -7,12 +7,15 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	appBranch "github.com/ruziba3vich/sahiy_management/internal/application/branch"
 	appDept "github.com/ruziba3vich/sahiy_management/internal/application/department"
+	appSchedule "github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	appSec "github.com/ruziba3vich/sahiy_management/internal/application/section"
 	appTask "github.com/ruziba3vich/sahiy_management/internal/application/task"
 	appTH "github.com/ruziba3vich/sahiy_management/internal/application/taskhistory"
 	appTS "github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
 	appUser "github.com/ruziba3vich/sahiy_management/internal/application/user"
+	appUserAction "github.com/ruziba3vich/sahiy_management/internal/application/useraction"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/handler"
 	"github.com/ruziba3vich/sahiy_management/pkg/database"
@@ -55,9 +58,21 @@ func main() {
 	secService := appSec.NewService(secRepo)
 	secHandler := handler.NewSectionHandler(secService)
 
+	branchRepo := postgres.NewBranchRepository(db)
+	branchService := appBranch.NewService(branchRepo)
+	branchHandler := handler.NewBranchHandler(branchService)
+
+	scheduleRepo := postgres.NewScheduleRepository(db)
+	scheduleService := appSchedule.NewService(scheduleRepo)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+
 	userRepo := postgres.NewUserRepository(db)
 	userService := appUser.NewService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
+
+	userActionRepo := postgres.NewUserActionRepository(db)
+	userActionService := appUserAction.NewService(userActionRepo)
+	userActionHandler := handler.NewUserActionHandler(userActionService)
 
 	tsRepo := postgres.NewTaskStatusRepository(db)
 	tsService := appTS.NewService(tsRepo)
@@ -78,7 +93,10 @@ func main() {
 	api := r.Group("/api/v1")
 	deptHandler.RegisterRoutes(api)
 	secHandler.RegisterRoutes(api)
+	branchHandler.RegisterRoutes(api)
+	scheduleHandler.RegisterRoutes(api)
 	userHandler.RegisterRoutes(api)
+	userActionHandler.RegisterRoutes(api)
 	tsHandler.RegisterRoutes(api)
 	taskHandler.RegisterRoutes(api)
 	thHandler.RegisterRoutes(api)
