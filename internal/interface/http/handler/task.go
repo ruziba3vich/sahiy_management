@@ -37,6 +37,11 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		return
 	}
 
+	status := 1
+	if req.Status != nil {
+		status = *req.Status
+	}
+
 	task, err := h.service.Create(
 		c.Request.Context(),
 		req.ParentID,
@@ -45,7 +50,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		req.Description,
 		req.Priority,
 		req.Deadline,
-		req.Status,
+		status,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
@@ -42,7 +43,13 @@ func (h *ScheduleHandler) Create(c *gin.Context) {
 		status = *req.Status
 	}
 
-	schedule, err := h.service.Create(c.Request.Context(), req.Name, req.Timezone, req.WeekDays, status)
+	weekDays, err := json.Marshal(req.WeekDays)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid week_days"})
+		return
+	}
+
+	schedule, err := h.service.Create(c.Request.Context(), req.Name, req.Timezone, weekDays, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -77,7 +84,13 @@ func (h *ScheduleHandler) Update(c *gin.Context) {
 		return
 	}
 
-	schedule, err := h.service.Update(c.Request.Context(), id, req.Name, req.Timezone, req.WeekDays, req.Status)
+	weekDays, err := json.Marshal(req.WeekDays)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid week_days"})
+		return
+	}
+
+	schedule, err := h.service.Update(c.Request.Context(), id, req.Name, req.Timezone, weekDays, req.Status)
 	if err != nil {
 		if errors.Is(err, postgres.ErrScheduleNotFound) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "schedule not found"})
