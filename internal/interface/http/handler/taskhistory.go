@@ -37,7 +37,12 @@ func (h *TaskHistoryHandler) Create(c *gin.Context) {
 		return
 	}
 
-	th, err := h.service.Create(c.Request.Context(), req.TaskID, req.UserID, req.Status)
+	status := 1
+	if req.Status != nil {
+		status = *req.Status
+	}
+
+	th, err := h.service.Create(c.Request.Context(), req.TaskID, req.UserID, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return

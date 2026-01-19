@@ -16,7 +16,10 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	// Handlers
 	deptHandler := handler.NewDepartmentHandler(svc.GetDepartment())
 	secHandler := handler.NewSectionHandler(svc.GetSection())
+	branchHandler := handler.NewBranchHandler(svc.GetBranch())
+	scheduleHandler := handler.NewScheduleHandler(svc.GetSchedule())
 	userHandler := handler.NewUserHandler(svc.GetUser())
+	userActionHandler := handler.NewUserActionHandler(svc.GetUserAction())
 	tsHandler := handler.NewTaskStatusHandler(svc.GetTaskStatus())
 	taskHandler := handler.NewTaskHandler(svc.GetTask())
 	thHandler := handler.NewTaskHistoryHandler(svc.GetTaskHistory())
@@ -43,6 +46,12 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	// Sections
 	registerCRUD(protected, "/sections", "sections", authService, secHandler)
 
+	// Branches
+	registerCRUD(protected, "/branches", "branches", authService, branchHandler)
+
+	// Schedules
+	registerCRUD(protected, "/schedules", "schedules", authService, scheduleHandler)
+
 	// Users
 	users := protected.Group("/users")
 	users.POST("", middleware.RequirePrivilege(authService, "users", "create"), userHandler.Create)
@@ -54,6 +63,9 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	users.GET("/:id/privileges", middleware.RequirePrivilege(authService, "privileges", "read"), privHandler.GetUserPrivileges)
 	users.POST("/:id/privileges", middleware.RequirePrivilege(authService, "privileges", "assign"), privHandler.AssignPrivilege)
 	users.DELETE("/:id/privileges/:privilegeId", middleware.RequirePrivilege(authService, "privileges", "revoke"), privHandler.RevokePrivilege)
+
+	// User Actions
+	registerCRUD(protected, "/user-actions", "user-actions", authService, userActionHandler)
 
 	// Task Statuses
 	registerCRUD(protected, "/task-statuses", "task-statuses", authService, tsHandler)
