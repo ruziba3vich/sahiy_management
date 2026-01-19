@@ -2,19 +2,20 @@ package postgres
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
 )
 
 var ErrTaskNotFound = errors.New("task not found")
 
 type TaskRepository struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewTaskRepository(db *sql.DB) domain.Repository {
+func NewTaskRepository(db *pgxpool.Pool) domain.Repository {
 	return &TaskRepository{db: db}
 }
 
@@ -25,7 +26,7 @@ func (r *TaskRepository) CreateTask(ctx context.Context, task *domain.Task) (*do
 		RETURNING id
 	`
 
-	err := r.db.QueryRowContext(ctx, query,
+	err := r.db.QueryRow(ctx, query,
 		task.ParentID,
 		task.SectionID,
 		task.Title,
@@ -50,7 +51,7 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, task *domain.Task) (*do
 		WHERE id = $9
 	`
 
-	result, err := r.db.ExecContext(ctx, query,
+	result, err := r.db.Exec(ctx, query,
 		task.ParentID,
 		task.SectionID,
 		task.Title,
@@ -65,11 +66,7 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, task *domain.Task) (*do
 		return nil, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return nil, ErrTaskNotFound
 	}
 
@@ -79,16 +76,12 @@ func (r *TaskRepository) UpdateTask(ctx context.Context, task *domain.Task) (*do
 func (r *TaskRepository) DeleteTask(ctx context.Context, id int64) error {
 	query := `DELETE FROM tasks WHERE id = $1`
 
-	result, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.Exec(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
+	if result.RowsAffected() == 0 {
 		return ErrTaskNotFound
 	}
 
@@ -103,7 +96,7 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id int64) (*domain.Tas
 	`
 
 	task := &domain.Task{}
-	err := r.db.QueryRowContext(ctx, query, id).Scan(
+	err := r.db.QueryRow(ctx, query, id).Scan(
 		&task.ID,
 		&task.ParentID,
 		&task.SectionID,
@@ -116,7 +109,7 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id int64) (*domain.Tas
 		&task.UpdatedAt,
 	)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrTaskNotFound
 		}
 		return nil, err
@@ -132,7 +125,7 @@ func (r *TaskRepository) GetAllTasks(ctx context.Context) ([]*domain.Task, error
 		ORDER BY id
 	`
 
-	rows, err := r.db.QueryContext(ctx, query)
+	rows, err := r.db.Query(ctx, query)
 	if err != nil {
 		return nil, err
 	}

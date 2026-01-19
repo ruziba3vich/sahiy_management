@@ -1,8 +1,9 @@
 package taskhistory
 
 import (
-	"database/sql"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type TaskHistory struct {
@@ -11,7 +12,7 @@ type TaskHistory struct {
 	UserID     int64
 	Status     int
 	StartedAt  int64
-	FinishedAt sql.NullInt64
+	FinishedAt pgtype.Int8
 }
 
 func NewTaskHistory(taskID, userID int64, status int) *TaskHistory {
@@ -28,12 +29,12 @@ func (th *TaskHistory) Update(taskID, userID int64, status int, finishedAt *int6
 	th.UserID = userID
 	th.Status = status
 	if finishedAt != nil {
-		th.FinishedAt = sql.NullInt64{Int64: *finishedAt, Valid: true}
+		th.FinishedAt = pgtype.Int8{Int64: *finishedAt, Valid: true}
 	} else {
-		th.FinishedAt = sql.NullInt64{Valid: false}
+		th.FinishedAt = pgtype.Int8{Valid: false}
 	}
 }
 
 func (th *TaskHistory) Finish() {
-	th.FinishedAt = sql.NullInt64{Int64: time.Now().Unix(), Valid: true}
+	th.FinishedAt = pgtype.Int8{Int64: time.Now().Unix(), Valid: true}
 }
