@@ -1,5 +1,13 @@
 basePath: /api/v1
 definitions:
+  dto.AssignPrivilegeRequest:
+    properties:
+      privilege_id:
+        example: 1
+        type: integer
+    required:
+    - privilege_id
+    type: object
   dto.CreateDepartmentRequest:
     properties:
       name:
@@ -11,6 +19,25 @@ definitions:
     required:
     - name
     - status
+    type: object
+  dto.CreatePrivilegeRequest:
+    properties:
+      action:
+        example: create
+        type: string
+      description:
+        example: Create new departments
+        type: string
+      name:
+        example: departments:create
+        type: string
+      resource:
+        example: departments
+        type: string
+    required:
+    - action
+    - name
+    - resource
     type: object
   dto.CreateSectionRequest:
     properties:
@@ -141,6 +168,61 @@ definitions:
         example: department not found
         type: string
     type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        example: SuperSecure2026!
+        type: string
+      phone:
+        example: "+998901112233"
+        type: string
+    required:
+    - password
+    - phone
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/dto.UserResponse'
+    type: object
+  dto.PrivilegeResponse:
+    properties:
+      action:
+        example: create
+        type: string
+      created_at:
+        example: 1737277200
+        type: integer
+      description:
+        example: Create new departments
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: departments:create
+        type: string
+      resource:
+        example: departments
+        type: string
+      updated_at:
+        example: 1737277200
+        type: integer
+    type: object
+  dto.RefreshTokenRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  dto.RefreshTokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
   dto.SectionResponse:
     properties:
       created_at:
@@ -236,6 +318,25 @@ definitions:
     required:
     - name
     - status
+    type: object
+  dto.UpdatePrivilegeRequest:
+    properties:
+      action:
+        example: create
+        type: string
+      description:
+        example: Create new departments
+        type: string
+      name:
+        example: departments:create
+        type: string
+      resource:
+        example: departments
+        type: string
+    required:
+    - action
+    - name
+    - resource
     type: object
   dto.UpdateSectionRequest:
     properties:
@@ -341,6 +442,16 @@ definitions:
     - schedule_id
     - section_id
     type: object
+  dto.UserPrivilegeResponse:
+    properties:
+      privileges:
+        items:
+          $ref: '#/definitions/dto.PrivilegeResponse'
+        type: array
+      user_id:
+        example: 1
+        type: integer
+    type: object
   dto.UserResponse:
     properties:
       created_at:
@@ -384,6 +495,74 @@ info:
   title: Sahiy Management API
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with phone and password, returns JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get a new access token using an existing (possibly expired) token
+      parameters:
+      - description: Token to refresh
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RefreshTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
   /departments:
     get:
       description: Retrieve a list of all departments
@@ -529,6 +708,233 @@ paths:
       summary: Update a department
       tags:
       - departments
+  /privileges:
+    get:
+      description: Get all privileges
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.PrivilegeResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all privileges
+      tags:
+      - privileges
+    post:
+      consumes:
+      - application/json
+      description: Create a new privilege
+      parameters:
+      - description: Privilege data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePrivilegeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.PrivilegeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create privilege
+      tags:
+      - privileges
+  /privileges/{id}:
+    delete:
+      description: Delete a privilege by its ID
+      parameters:
+      - description: Privilege ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete privilege
+      tags:
+      - privileges
+    get:
+      description: Get a privilege by its ID
+      parameters:
+      - description: Privilege ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PrivilegeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get privilege by ID
+      tags:
+      - privileges
+    put:
+      consumes:
+      - application/json
+      description: Update an existing privilege
+      parameters:
+      - description: Privilege ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Privilege data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePrivilegeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.PrivilegeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update privilege
+      tags:
+      - privileges
   /sections:
     get:
       description: Retrieve a list of all sections
@@ -1254,4 +1660,157 @@ paths:
       summary: Update a user
       tags:
       - users
+  /users/{id}/privileges:
+    get:
+      description: Get all privileges assigned to a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserPrivilegeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user privileges
+      tags:
+      - user-privileges
+    post:
+      consumes:
+      - application/json
+      description: Assign a privilege to a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Privilege assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignPrivilegeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Assign privilege to user
+      tags:
+      - user-privileges
+  /users/{id}/privileges/{privilegeId}:
+    delete:
+      description: Revoke a privilege from a user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Privilege ID
+        in: path
+        name: privilegeId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke privilege from user
+      tags:
+      - user-privileges
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
