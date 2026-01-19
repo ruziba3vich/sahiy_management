@@ -1,55 +1,5 @@
 basePath: /api/v1
 definitions:
-  dto.BranchResponse:
-    properties:
-      created_at:
-        example: 1737277200
-        type: integer
-      id:
-        example: 1
-        type: integer
-      lat:
-        example: 41.311081
-        type: number
-      long:
-        example: 69.240562
-        type: number
-      name:
-        example: Main Branch
-        type: string
-      radius:
-        example: 150
-        type: integer
-      status:
-        example: 1
-        type: integer
-      updated_at:
-        example: 1737277200
-        type: integer
-    type: object
-  dto.CreateBranchRequest:
-    properties:
-      lat:
-        example: 41.311081
-        type: number
-      long:
-        example: 69.240562
-        type: number
-      name:
-        example: Main Branch
-        type: string
-      radius:
-        example: 150
-        type: integer
-      status:
-        example: 1
-        type: integer
-    required:
-    - lat
-    - long
-    - name
-    - radius
-    type: object
   dto.AssignPrivilegeRequest:
     properties:
       privilege_id:
@@ -118,47 +68,6 @@ definitions:
         type: integer
     required:
     - name
-    - status
-    type: object
-  dto.CreateScheduleRequest:
-    properties:
-      name:
-        example: Default
-        type: string
-      status:
-        example: 1
-        type: integer
-      timezone:
-        example: 5
-        type: integer
-      week_days:
-        additionalProperties:
-          $ref: '#/definitions/dto.ScheduleDay'
-        type: object
-    required:
-    - name
-    - timezone
-    - week_days
-    type: object
-  dto.CreateScheduleRequest:
-    properties:
-      name:
-        example: Default
-        type: string
-      status:
-        example: 1
-        type: integer
-      timezone:
-        example: 5
-        type: integer
-      week_days:
-        additionalProperties:
-          $ref: '#/definitions/dto.ScheduleDay'
-        type: object
-    required:
-    - name
-    - timezone
-    - week_days
     type: object
   dto.CreatePrivilegeRequest:
     properties:
@@ -178,6 +87,26 @@ definitions:
     - action
     - name
     - resource
+    type: object
+  dto.CreateScheduleRequest:
+    properties:
+      name:
+        example: Default
+        type: string
+      status:
+        example: 1
+        type: integer
+      timezone:
+        example: 5
+        type: integer
+      week_days:
+        additionalProperties:
+          $ref: '#/definitions/dto.ScheduleDay'
+        type: object
+    required:
+    - name
+    - timezone
+    - week_days
     type: object
   dto.CreateSectionRequest:
     properties:
@@ -203,7 +132,6 @@ definitions:
         example: 1
         type: integer
     required:
-    - status
     - task_id
     - user_id
     type: object
@@ -234,7 +162,6 @@ definitions:
     - deadline
     - priority
     - section_id
-    - status
     - title
     type: object
   dto.CreateTaskStatusRequest:
@@ -336,40 +263,6 @@ definitions:
       error:
         example: department not found
         type: string
-    type: object
-  dto.ScheduleDay:
-    properties:
-      finish_at:
-        example: "18:00"
-        type: string
-      start_at:
-        example: "09:00"
-        type: string
-    type: object
-  dto.ScheduleResponse:
-    properties:
-      created_at:
-        example: 1737277200
-        type: integer
-      id:
-        example: 1
-        type: integer
-      name:
-        example: Default
-        type: string
-      status:
-        example: 1
-        type: integer
-      timezone:
-        example: 5
-        type: integer
-      updated_at:
-        example: 1737277200
-        type: integer
-      week_days:
-        additionalProperties:
-          $ref: '#/definitions/dto.ScheduleDay'
-        type: object
     type: object
   dto.LoginRequest:
     properties:
@@ -620,27 +513,6 @@ definitions:
     - timezone
     - week_days
     type: object
-  dto.UpdateScheduleRequest:
-    properties:
-      name:
-        example: Default
-        type: string
-      status:
-        example: 1
-        type: integer
-      timezone:
-        example: 5
-        type: integer
-      week_days:
-        additionalProperties:
-          $ref: '#/definitions/dto.ScheduleDay'
-        type: object
-    required:
-    - name
-    - status
-    - timezone
-    - week_days
-    type: object
   dto.UpdateSectionRequest:
     properties:
       department_id:
@@ -743,35 +615,6 @@ definitions:
     - user_id
     - visit_branch_id
     type: object
-  dto.UpdateUserActionRequest:
-    properties:
-      come_status:
-        example: 1
-        type: integer
-      finished_at:
-        example: 1737280800
-        type: integer
-      leave_branch_id:
-        example: 2
-        type: integer
-      out_status:
-        example: 1
-        type: integer
-      started_at:
-        example: 1737277200
-        type: integer
-      user_id:
-        example: 1
-        type: integer
-      visit_branch_id:
-        example: 1
-        type: integer
-    required:
-    - come_status
-    - started_at
-    - user_id
-    - visit_branch_id
-    type: object
   dto.UpdateUserRequest:
     properties:
       department_id:
@@ -840,33 +683,6 @@ definitions:
         example: 1
         type: integer
     type: object
-  dto.UserActionResponse:
-    properties:
-      come_status:
-        example: 1
-        type: integer
-      finished_at:
-        example: 1737280800
-        type: integer
-      id:
-        example: 1
-        type: integer
-      leave_branch_id:
-        example: 2
-        type: integer
-      out_status:
-        example: 1
-        type: integer
-      started_at:
-        example: 1737277200
-        type: integer
-      user_id:
-        example: 1
-        type: integer
-      visit_branch_id:
-        example: 1
-        type: integer
-    type: object
   dto.UserResponse:
     properties:
       created_at:
@@ -910,151 +726,6 @@ info:
   title: Sahiy Management API
   version: "1.0"
 paths:
-  /branches:
-    get:
-      description: Retrieve a list of all branches
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.BranchResponse'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get all branches
-      tags:
-      - branches
-    post:
-      consumes:
-      - application/json
-      description: Create a new branch with the provided data
-      parameters:
-      - description: Branch data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateBranchRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/dto.BranchResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create a new branch
-      tags:
-      - branches
-  /branches/{id}:
-    delete:
-      description: Delete a branch by ID
-      parameters:
-      - description: Branch ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete a branch
-      tags:
-      - branches
-    get:
-      description: Retrieve a single branch by its ID
-      parameters:
-      - description: Branch ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.BranchResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get a branch by ID
-      tags:
-      - branches
-    put:
-      consumes:
-      - application/json
-      description: Update an existing branch by ID
-      parameters:
-      - description: Branch ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Branch data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateBranchRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.BranchResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update a branch
-      tags:
-      - branches
   /auth/login:
     post:
       consumes:
@@ -1413,151 +1084,6 @@ paths:
       summary: Update a department
       tags:
       - departments
-  /schedules:
-    get:
-      description: Retrieve a list of all schedules
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/dto.ScheduleResponse'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get all schedules
-      tags:
-      - schedules
-    post:
-      consumes:
-      - application/json
-      description: Create a new schedule with the provided data
-      parameters:
-      - description: Schedule data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateScheduleRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/dto.ScheduleResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create a new schedule
-      tags:
-      - schedules
-  /schedules/{id}:
-    delete:
-      description: Delete a schedule by ID
-      parameters:
-      - description: Schedule ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Delete a schedule
-      tags:
-      - schedules
-    get:
-      description: Retrieve a single schedule by its ID
-      parameters:
-      - description: Schedule ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.ScheduleResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get a schedule by ID
-      tags:
-      - schedules
-    put:
-      consumes:
-      - application/json
-      description: Update an existing schedule by ID
-      parameters:
-      - description: Schedule ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Schedule data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/dto.UpdateScheduleRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.ScheduleResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update a schedule
-      tags:
-      - schedules
   /privileges:
     get:
       description: Get all privileges
