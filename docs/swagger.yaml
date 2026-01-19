@@ -24,6 +24,41 @@ definitions:
     - department_id
     - name
     type: object
+  dto.CreateUserRequest:
+    properties:
+      department_id:
+        example: 1
+        type: integer
+      full_name:
+        example: John Doe
+        type: string
+      password:
+        example: securepassword
+        type: string
+      phone:
+        example: "+998901234567"
+        type: string
+      role:
+        example: 1
+        type: integer
+      schedule_id:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      tg_chat_id:
+        example: 123456789
+        type: integer
+    required:
+    - department_id
+    - full_name
+    - password
+    - phone
+    - role
+    - schedule_id
+    - section_id
+    type: object
   dto.DepartmentResponse:
     properties:
       created_at:
@@ -89,6 +124,73 @@ definitions:
     required:
     - department_id
     - name
+    type: object
+  dto.UpdateUserRequest:
+    properties:
+      department_id:
+        example: 1
+        type: integer
+      full_name:
+        example: John Doe
+        type: string
+      phone:
+        example: "+998901234567"
+        type: string
+      role:
+        example: 1
+        type: integer
+      schedule_id:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      tg_chat_id:
+        example: 123456789
+        type: integer
+    required:
+    - department_id
+    - full_name
+    - phone
+    - role
+    - schedule_id
+    - section_id
+    type: object
+  dto.UserResponse:
+    properties:
+      created_at:
+        example: 1737277200
+        type: integer
+      department_id:
+        example: 1
+        type: integer
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
+      joined_at:
+        example: 1737277200
+        type: integer
+      phone:
+        example: "+998901234567"
+        type: string
+      role:
+        example: 1
+        type: integer
+      schedule_id:
+        example: 1
+        type: integer
+      section_id:
+        example: 1
+        type: integer
+      tg_chat_id:
+        example: 123456789
+        type: integer
+      updated_at:
+        example: 1737277200
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -387,4 +489,149 @@ paths:
       summary: Update a section
       tags:
       - sections
+  /users:
+    get:
+      description: Retrieve a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided data
+      parameters:
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Delete a user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      description: Retrieve a single user by its ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a user
+      tags:
+      - users
 swagger: "2.0"
