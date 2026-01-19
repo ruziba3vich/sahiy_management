@@ -171,17 +171,12 @@ func main() {
 	privileges.GET("/:id", middleware.RequirePrivilege(authService, "privileges", "read"), privHandler.GetByID)
 	privileges.PUT("/:id", middleware.RequirePrivilege(authService, "privileges", "update"), privHandler.Update)
 	privileges.DELETE("/:id", middleware.RequirePrivilege(authService, "privileges", "delete"), privHandler.Delete)
-	deptHandler.RegisterRoutes(api)
-	secHandler.RegisterRoutes(api)
 	branchHandler.RegisterRoutes(api)
 	scheduleHandler.RegisterRoutes(api)
-	userHandler.RegisterRoutes(api)
 	userActionHandler.RegisterRoutes(api)
-	tsHandler.RegisterRoutes(api)
-	taskHandler.RegisterRoutes(api)
-	thHandler.RegisterRoutes(api)
+	// Note: department/section/user/task routes are registered above with RBAC.
 
-	port := getEnv("PORT", "8080")
+	port := getEnv("PORT", "8098")
 	log.Printf("Server starting on port %s", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
