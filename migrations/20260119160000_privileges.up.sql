@@ -42,7 +42,19 @@ INSERT INTO "privileges" ("name", "resource", "action", "description", "created_
     ('privileges:update', 'privileges', 'update', 'Update privileges', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
     ('privileges:delete', 'privileges', 'delete', 'Delete privileges', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
     ('privileges:assign', 'privileges', 'assign', 'Assign privileges to users', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
-    ('privileges:revoke', 'privileges', 'revoke', 'Revoke privileges from users', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT)
+    ('privileges:revoke', 'privileges', 'revoke', 'Revoke privileges from users', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('branches:create', 'branches', 'create', 'Create new branches', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('branches:read', 'branches', 'read', 'View branches', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('branches:update', 'branches', 'update', 'Update branches', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('branches:delete', 'branches', 'delete', 'Delete branches', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('schedules:create', 'schedules', 'create', 'Create new schedules', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('schedules:read', 'schedules', 'read', 'View schedules', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('schedules:update', 'schedules', 'update', 'Update schedules', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('schedules:delete', 'schedules', 'delete', 'Delete schedules', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('user-actions:create', 'user-actions', 'create', 'Create new user actions', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('user-actions:read', 'user-actions', 'read', 'View user actions', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('user-actions:update', 'user-actions', 'update', 'Update user actions', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT),
+    ('user-actions:delete', 'user-actions', 'delete', 'Delete user actions', EXTRACT(EPOCH FROM NOW())::BIGINT, EXTRACT(EPOCH FROM NOW())::BIGINT)
 ON CONFLICT ("name") DO NOTHING;
 
 -- privileges-table

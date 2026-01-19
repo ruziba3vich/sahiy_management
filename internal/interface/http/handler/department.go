@@ -39,7 +39,12 @@ func (h *DepartmentHandler) Create(c *gin.Context) {
 		return
 	}
 
-	dept, err := h.service.Create(c.Request.Context(), req.Name, req.Status)
+	status := 1
+	if req.Status != nil {
+		status = *req.Status
+	}
+
+	dept, err := h.service.Create(c.Request.Context(), req.Name, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
