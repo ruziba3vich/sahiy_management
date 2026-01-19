@@ -447,6 +447,225 @@
                 }
             }
         },
+        "/task-statuses": {
+            "get": {
+                "description": "Retrieve a list of all task statuses",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Get all task statuses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.TaskStatusResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new task status with the provided name and type",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Create a new task status",
+                "parameters": [
+                    {
+                        "description": "Task status data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateTaskStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task-statuses/{id}": {
+            "get": {
+                "description": "Retrieve a single task status by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Get a task status by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task status ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing task status by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Update a task status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task status ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Task status data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateTaskStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskStatusResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a task status by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Delete a task status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task status ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Retrieve a list of all users",
@@ -702,6 +921,23 @@
                 }
             }
         },
+        "dto.CreateTaskStatusRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "In Progress"
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.CreateUserRequest": {
             "type": "object",
             "required": [
@@ -807,6 +1043,23 @@
                 }
             }
         },
+        "dto.TaskStatusResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "In Progress"
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.UpdateDepartmentRequest": {
             "type": "object",
             "required": [
@@ -838,6 +1091,23 @@
                 "name": {
                     "type": "string",
                     "example": "Backend Development"
+                }
+            }
+        },
+        "dto.UpdateTaskStatusRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "In Progress"
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },

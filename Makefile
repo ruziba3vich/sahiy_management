@@ -16,11 +16,13 @@ migrate-down:
 	@echo "Rolled back 1 migration"
 
 migrate-force:
-ifndef version
-	$(error version is required. Usage: make migrate-force version=20260119120010)
-endif
-	@migrate -path ./migrations -database "$(DB_URL)" force $(version)
-	@echo "Forced migration version to $(version)"
+	@version=$$(ls -1 ./migrations/*.up.sql 2>/dev/null | sort -r | head -1 | sed 's/.*\/\([0-9]*\)_.*/\1/'); \
+	if [ -z "$$version" ]; then \
+		echo "No migrations found"; \
+		exit 1; \
+	fi; \
+	migrate -path ./migrations -database "$(DB_URL)" force $$version; \
+	echo "Forced migration version to $$version"
 
 migrate-create:
 ifndef name
