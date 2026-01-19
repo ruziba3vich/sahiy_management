@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Config struct {
+type DBConfig struct {
 	Host     string
 	Port     int
 	User     string
@@ -16,7 +16,7 @@ type Config struct {
 	SSLMode  string
 }
 
-func NewPostgresConnection(ctx context.Context, cfg *Config) (*pgxpool.Pool, error) {
+func NewPostgresConnection(ctx context.Context, cfg *DBConfig) (*pgxpool.Pool, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
