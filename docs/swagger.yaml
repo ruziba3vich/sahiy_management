@@ -24,6 +24,18 @@ definitions:
     - department_id
     - name
     type: object
+  dto.CreateTaskStatusRequest:
+    properties:
+      name:
+        example: In Progress
+        type: string
+      type:
+        example: 1
+        type: integer
+    required:
+    - name
+    - type
+    type: object
   dto.CreateUserRequest:
     properties:
       department_id:
@@ -101,6 +113,18 @@ definitions:
         example: 1737277200
         type: integer
     type: object
+  dto.TaskStatusResponse:
+    properties:
+      id:
+        example: 1
+        type: integer
+      name:
+        example: In Progress
+        type: string
+      type:
+        example: 1
+        type: integer
+    type: object
   dto.UpdateDepartmentRequest:
     properties:
       name:
@@ -124,6 +148,18 @@ definitions:
     required:
     - department_id
     - name
+    type: object
+  dto.UpdateTaskStatusRequest:
+    properties:
+      name:
+        example: In Progress
+        type: string
+      type:
+        example: 1
+        type: integer
+    required:
+    - name
+    - type
     type: object
   dto.UpdateUserRequest:
     properties:
@@ -489,6 +525,151 @@ paths:
       summary: Update a section
       tags:
       - sections
+  /task-statuses:
+    get:
+      description: Retrieve a list of all task statuses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.TaskStatusResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all task statuses
+      tags:
+      - task-statuses
+    post:
+      consumes:
+      - application/json
+      description: Create a new task status with the provided name and type
+      parameters:
+      - description: Task status data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateTaskStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.TaskStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new task status
+      tags:
+      - task-statuses
+  /task-statuses/{id}:
+    delete:
+      description: Delete a task status by ID
+      parameters:
+      - description: Task status ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a task status
+      tags:
+      - task-statuses
+    get:
+      description: Retrieve a single task status by its ID
+      parameters:
+      - description: Task status ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a task status by ID
+      tags:
+      - task-statuses
+    put:
+      consumes:
+      - application/json
+      description: Update an existing task status by ID
+      parameters:
+      - description: Task status ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task status data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateTaskStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a task status
+      tags:
+      - task-statuses
   /users:
     get:
       description: Retrieve a list of all users
