@@ -5,7 +5,7 @@ import domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskhisto
 type CreateTaskHistoryRequest struct {
 	TaskID int64 `json:"task_id" binding:"required" example:"1"`
 	UserID int64 `json:"user_id" binding:"required" example:"1"`
-	Status int   `json:"status" binding:"required" example:"1"`
+	Status *int  `json:"status" example:"1"`
 }
 
 type UpdateTaskHistoryRequest struct {
@@ -44,4 +44,27 @@ func ToTaskHistoryResponseList(histories []*domain.TaskHistory) []*TaskHistoryRe
 		responses[i] = ToTaskHistoryResponse(th)
 	}
 	return responses
+}
+
+type TaskHistoryListResponse struct {
+	Data       []*TaskHistoryResponse `json:"data"`
+	TotalCount int64                  `json:"total_count" example:"100"`
+	Page       int                    `json:"page" example:"1"`
+	PageSize   int                    `json:"page_size" example:"20"`
+	TotalPages int                    `json:"total_pages" example:"5"`
+}
+
+func ToTaskHistoryListResponse(result *domain.TaskHistoryListResult, page, pageSize int) *TaskHistoryListResponse {
+	totalPages := int(result.TotalCount) / pageSize
+	if int(result.TotalCount)%pageSize > 0 {
+		totalPages++
+	}
+
+	return &TaskHistoryListResponse{
+		Data:       ToTaskHistoryResponseList(result.Histories),
+		TotalCount: result.TotalCount,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}
 }

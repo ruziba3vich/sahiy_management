@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -142,4 +143,84 @@ func (r *TaskHistoryRepository) GetAllTaskHistories(ctx context.Context) ([]*dom
 	}
 
 	return histories, nil
+}
+
+func (r *TaskHistoryRepository) GetTaskHistoriesWithFilter(ctx context.Context, filter *domain.TaskHistoryFilter) (*domain.TaskHistoryListResult, error) {
+	baseQuery := `FROM task_histories WHERE 1=1`
+	args := []interface{}{}
+	argCount := 0
+
+	if filter.UserID != nil {
+		argCount++
+		baseQuery += fmt.Sprintf(" AND user_id = $%d", argCount)
+		args = append(args, *filter.UserID)
+	}
+
+	if filter.TaskID != nil {
+		argCount++
+		baseQuery += fmt.Sprintf(" AND task_id = $%d", argCount)
+		args = append(args, *filter.TaskID)
+	}
+
+	if filter.Status != nil {
+		argCount++
+		baseQuery += fmt.Sprintf(" AND status = $%d", argCount)
+		args = append(args, *filter.Status)
+	}
+
+	// Get total count
+	countQuery := "SELECT COUNT(*) " + baseQuery
+	var totalCount int64
+	err := r.db.QueryRow(ctx, countQuery, args...).Scan(&totalCount)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get paginated results
+	selectQuery := `SELECT id, task_id, user_id, status, started_at, finished_at ` + baseQuery + ` ORDER BY started_at DESC`
+
+	if filter.PageSize > 0 {
+		offset := (filter.Page - 1) * filter.PageSize
+		if offset < 0 {
+			offset = 0
+		}
+		argCount++
+		selectQuery += fmt.Sprintf(" LIMIT $%d", argCount)
+		args = append(args, filter.PageSize)
+		argCount++
+		selectQuery += fmt.Sprintf(" OFFSET $%d", argCount)
+		args = append(args, offset)
+	}
+
+	rows, err := r.db.Query(ctx, selectQuery, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var histories []*domain.TaskHistory
+	for rows.Next() {
+		th := &domain.TaskHistory{}
+		err := rows.Scan(
+			&th.ID,
+			&th.TaskID,
+			&th.UserID,
+			&th.Status,
+			&th.StartedAt,
+			&th.FinishedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		histories = append(histories, th)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &domain.TaskHistoryListResult{
+		Histories:  histories,
+		TotalCount: totalCount,
+	}, nil
 }

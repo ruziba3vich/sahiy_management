@@ -1,0 +1,42 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go
+vendor/
+
+# Docker
+Dockerfile
+docker-compose*.yaml
+.dockerignore
+
+# Environment files (use docker-compose environment instead)
+.env
+.env.*
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Test files
+*_test.go

@@ -119,6 +119,225 @@ const docTemplate = `{
                 }
             }
         },
+        "/branches": {
+            "get": {
+                "description": "Retrieve a list of all branches",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Get all branches",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.BranchResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new branch with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Create a new branch",
+                "parameters": [
+                    {
+                        "description": "Branch data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/branches/{id}": {
+            "get": {
+                "description": "Retrieve a single branch by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Get a branch by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing branch by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Update a branch",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Branch data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a branch by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branches"
+                ],
+                "summary": "Delete a branch",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/departments": {
             "get": {
                 "description": "Retrieve a list of all departments",
@@ -338,67 +557,36 @@ const docTemplate = `{
                 }
             }
         },
-        "/privileges": {
+        "/schedules": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all privileges",
+                "description": "Retrieve a list of all schedules",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "privileges"
+                    "schedules"
                 ],
-                "summary": "Get all privileges",
+                "summary": "Get all schedules",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.PrivilegeResponse"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                                "$ref": "#/definitions/dto.ScheduleResponse"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             },
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Create a new privilege",
+                "description": "Create a new schedule with the provided data",
                 "consumes": [
                     "application/json"
                 ],
@@ -406,17 +594,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "privileges"
+                    "schedules"
                 ],
-                "summary": "Create privilege",
+                "summary": "Create a new schedule",
                 "parameters": [
                     {
-                        "description": "Privilege data",
+                        "description": "Schedule data",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreatePrivilegeRequest"
+                            "$ref": "#/definitions/dto.CreateScheduleRequest"
                         }
                     }
                 ],
@@ -424,67 +612,38 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrivilegeResponse"
+                            "$ref": "#/definitions/dto.ScheduleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             }
         },
-        "/privileges/{id}": {
+        "/schedules/{id}": {
             "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get a privilege by its ID",
+                "description": "Retrieve a single schedule by its ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "privileges"
+                    "schedules"
                 ],
-                "summary": "Get privilege by ID",
+                "summary": "Get a schedule by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Privilege ID",
+                        "description": "Schedule ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -494,54 +653,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrivilegeResponse"
+                            "$ref": "#/definitions/dto.ScheduleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             },
             "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Update an existing privilege",
+                "description": "Update an existing schedule by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -549,24 +685,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "privileges"
+                    "schedules"
                 ],
-                "summary": "Update privilege",
+                "summary": "Update a schedule",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Privilege ID",
+                        "description": "Schedule ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Privilege data",
+                        "description": "Schedule data",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdatePrivilegeRequest"
+                            "$ref": "#/definitions/dto.UpdateScheduleRequest"
                         }
                     }
                 ],
@@ -574,74 +710,42 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrivilegeResponse"
+                            "$ref": "#/definitions/dto.ScheduleResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
             },
             "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Delete a privilege by its ID",
+                "description": "Delete a schedule by ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "privileges"
+                    "schedules"
                 ],
-                "summary": "Delete privilege",
+                "summary": "Delete a schedule",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Privilege ID",
+                        "description": "Schedule ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -654,37 +758,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -911,22 +997,56 @@ const docTemplate = `{
         },
         "/task-histories": {
             "get": {
-                "description": "Retrieve a list of all task histories",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of task histories with optional filters (user_id, task_id, status) and pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "task-histories"
                 ],
-                "summary": "Get all task histories",
+                "summary": "Get all task histories with filtering and pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by user ID",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by task ID",
+                        "name": "task_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.TaskHistoryResponse"
-                            }
+                            "$ref": "#/definitions/dto.TaskHistoryListResponse"
                         }
                     },
                     "500": {
@@ -969,6 +1089,69 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task-histories/my": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve task histories for the authenticated user with optional filters (task_id, status) and pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-histories"
+                ],
+                "summary": "Get current user's task histories with filtering and pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by task ID",
+                        "name": "task_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskHistoryListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1349,22 +1532,68 @@ const docTemplate = `{
         },
         "/tasks": {
             "get": {
-                "description": "Retrieve a list of all tasks",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of tasks with optional filters (user_id, section_id, status, priority, parent_id) and pagination",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "tasks"
                 ],
-                "summary": "Get all tasks",
+                "summary": "Get all tasks with filtering and pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by user ID",
+                        "name": "user_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by priority",
+                        "name": "priority",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by parent task ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.TaskResponse"
-                            }
+                            "$ref": "#/definitions/dto.TaskListResponse"
                         }
                     },
                     "500": {
@@ -1376,6 +1605,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new task with the provided data",
                 "consumes": [
                     "application/json"
@@ -1407,6 +1641,81 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/my": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve tasks assigned to the authenticated user with optional filters (section_id, status, priority, parent_id) and pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get current user's tasks with filtering and pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Filter by section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by priority",
+                        "name": "priority",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by parent task ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 20, max: 100)",
+                        "name": "page_size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TaskListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1467,6 +1776,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an existing task by ID",
                 "consumes": [
                     "application/json"
@@ -1536,6 +1850,225 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions": {
+            "get": {
+                "description": "Retrieve a list of all user actions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get all user actions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserActionResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new user action with the provided data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Create a new user action",
+                "parameters": [
+                    {
+                        "description": "User action data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions/{id}": {
+            "get": {
+                "description": "Retrieve a single user action by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get a user action by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing user action by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Update a user action",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User action data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user action by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Delete a user action",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User action ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1784,243 +2317,72 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/{id}/privileges": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Get all privileges assigned to a user",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-privileges"
-                ],
-                "summary": "Get user privileges",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserPrivilegeResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Assign a privilege to a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-privileges"
-                ],
-                "summary": "Assign privilege to user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Privilege assignment data",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AssignPrivilegeRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/users/{id}/privileges/{privilegeId}": {
-            "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Revoke a privilege from a user",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-privileges"
-                ],
-                "summary": "Revoke privilege from user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Privilege ID",
-                        "name": "privilegeId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "dto.AssignPrivilegeRequest": {
+        "dto.BranchResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                }
+            }
+        },
+        "dto.CreateBranchRequest": {
             "type": "object",
             "required": [
-                "privilege_id"
+                "lat",
+                "long",
+                "name",
+                "radius"
             ],
             "properties": {
-                "privilege_id": {
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2029,8 +2391,7 @@ const docTemplate = `{
         "dto.CreateDepartmentRequest": {
             "type": "object",
             "required": [
-                "name",
-                "status"
+                "name"
             ],
             "properties": {
                 "name": {
@@ -2043,29 +2404,31 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreatePrivilegeRequest": {
+        "dto.CreateScheduleRequest": {
             "type": "object",
             "required": [
-                "action",
                 "name",
-                "resource"
+                "timezone",
+                "week_days"
             ],
             "properties": {
-                "action": {
-                    "type": "string",
-                    "example": "create"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Create new departments"
-                },
                 "name": {
                     "type": "string",
-                    "example": "departments:create"
+                    "example": "Default"
                 },
-                "resource": {
-                    "type": "string",
-                    "example": "departments"
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
                 }
             }
         },
@@ -2089,7 +2452,6 @@ const docTemplate = `{
         "dto.CreateTaskHistoryRequest": {
             "type": "object",
             "required": [
-                "status",
                 "task_id",
                 "user_id"
             ],
@@ -2114,7 +2476,6 @@ const docTemplate = `{
                 "deadline",
                 "priority",
                 "section_id",
-                "status",
                 "title"
             ],
             "properties": {
@@ -2145,6 +2506,10 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Implement login feature"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2160,6 +2525,45 @@ const docTemplate = `{
                     "example": "In Progress"
                 },
                 "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.CreateUserActionRequest": {
+            "type": "object",
+            "required": [
+                "come_status",
+                "started_at",
+                "user_id",
+                "visit_branch_id"
+            ],
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2273,39 +2677,6 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PrivilegeResponse": {
-            "type": "object",
-            "properties": {
-                "action": {
-                    "type": "string",
-                    "example": "create"
-                },
-                "created_at": {
-                    "type": "integer",
-                    "example": 1737277200
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Create new departments"
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string",
-                    "example": "departments:create"
-                },
-                "resource": {
-                    "type": "string",
-                    "example": "departments"
-                },
-                "updated_at": {
-                    "type": "integer",
-                    "example": 1737277200
-                }
-            }
-        },
         "dto.RefreshTokenRequest": {
             "type": "object",
             "required": [
@@ -2322,6 +2693,54 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ScheduleDay": {
+            "type": "object",
+            "properties": {
+                "finish_at": {
+                    "type": "string",
+                    "example": "18:00"
+                },
+                "start_at": {
+                    "type": "string",
+                    "example": "09:00"
+                }
+            }
+        },
+        "dto.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Default"
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "updated_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
                 }
             }
         },
@@ -2347,6 +2766,33 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "integer",
                     "example": 1737277200
+                }
+            }
+        },
+        "dto.TaskHistoryListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TaskHistoryResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 5
                 }
             }
         },
@@ -2376,6 +2822,33 @@ const docTemplate = `{
                 "user_id": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "dto.TaskListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TaskResponse"
+                    }
+                },
+                "page": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "total_count": {
+                    "type": "integer",
+                    "example": 100
+                },
+                "total_pages": {
+                    "type": "integer",
+                    "example": 5
                 }
             }
         },
@@ -2421,6 +2894,10 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "integer",
                     "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2436,6 +2913,38 @@ const docTemplate = `{
                     "example": "In Progress"
                 },
                 "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UpdateBranchRequest": {
+            "type": "object",
+            "required": [
+                "lat",
+                "long",
+                "name",
+                "radius",
+                "status"
+            ],
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Main Branch"
+                },
+                "radius": {
+                    "type": "integer",
+                    "example": 150
+                },
+                "status": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2458,29 +2967,32 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdatePrivilegeRequest": {
+        "dto.UpdateScheduleRequest": {
             "type": "object",
             "required": [
-                "action",
                 "name",
-                "resource"
+                "status",
+                "timezone",
+                "week_days"
             ],
             "properties": {
-                "action": {
-                    "type": "string",
-                    "example": "create"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "Create new departments"
-                },
                 "name": {
                     "type": "string",
-                    "example": "departments:create"
+                    "example": "Default"
                 },
-                "resource": {
-                    "type": "string",
-                    "example": "departments"
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "timezone": {
+                    "type": "integer",
+                    "example": 5
+                },
+                "week_days": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/dto.ScheduleDay"
+                    }
                 }
             }
         },
@@ -2564,6 +3076,10 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Implement login feature"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2579,6 +3095,45 @@ const docTemplate = `{
                     "example": "In Progress"
                 },
                 "type": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UpdateUserActionRequest": {
+            "type": "object",
+            "required": [
+                "come_status",
+                "started_at",
+                "user_id",
+                "visit_branch_id"
+            ],
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2625,16 +3180,38 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserPrivilegeResponse": {
+        "dto.UserActionResponse": {
             "type": "object",
             "properties": {
-                "privileges": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.PrivilegeResponse"
-                    }
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
                 },
                 "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "visit_branch_id": {
                     "type": "integer",
                     "example": 1
                 }
