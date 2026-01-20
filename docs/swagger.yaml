@@ -323,6 +323,25 @@ definitions:
         example: 1737277200
         type: integer
     type: object
+  dto.TaskHistoryListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.TaskHistoryResponse'
+        type: array
+      page:
+        example: 1
+        type: integer
+      page_size:
+        example: 20
+        type: integer
+      total_count:
+        example: 100
+        type: integer
+      total_pages:
+        example: 5
+        type: integer
+    type: object
   dto.TaskHistoryResponse:
     properties:
       finished_at:
@@ -1324,21 +1343,43 @@ paths:
       - sections
   /task-histories:
     get:
-      description: Retrieve a list of all task histories
+      description: Retrieve a list of task histories with optional filters (user_id,
+        task_id, status) and pagination
+      parameters:
+      - description: Filter by user ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Filter by task ID
+        in: query
+        name: task_id
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20, max: 100)'
+        in: query
+        name: page_size
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/dto.TaskHistoryResponse'
-            type: array
+            $ref: '#/definitions/dto.TaskHistoryListResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Get all task histories
+      security:
+      - BearerAuth: []
+      summary: Get all task histories with filtering and pagination
       tags:
       - task-histories
     post:
@@ -1465,6 +1506,47 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Update a task history
+      tags:
+      - task-histories
+  /task-histories/my:
+    get:
+      description: Retrieve task histories for the authenticated user with optional
+        filters (task_id, status) and pagination
+      parameters:
+      - description: Filter by task ID
+        in: query
+        name: task_id
+        type: integer
+      - description: Filter by status
+        in: query
+        name: status
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size (default: 20, max: 100)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TaskHistoryListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user's task histories with filtering and pagination
       tags:
       - task-histories
   /task-statuses:
