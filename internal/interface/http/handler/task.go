@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	appTask "github.com/ruziba3vich/sahiy_management/internal/application/task"
+	domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/dto"
 )
@@ -25,6 +26,7 @@ func NewTaskHandler(service *appTask.Service) *TaskHandler {
 // @Tags         tasks
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        request  body      dto.CreateTaskRequest  true  "Task data"
 // @Success      201      {object}  dto.TaskResponse
 // @Failure      400      {object}  dto.ErrorResponse
@@ -46,6 +48,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		c.Request.Context(),
 		req.ParentID,
 		req.SectionID,
+		req.UserID,
 		req.Title,
 		req.Description,
 		req.Priority,
@@ -66,6 +69,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 // @Tags         tasks
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        id       path      int                    true  "Task ID"
 // @Param        request  body      dto.UpdateTaskRequest  true  "Task data"
 // @Success      200      {object}  dto.TaskResponse
@@ -91,6 +95,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		id,
 		req.ParentID,
 		req.SectionID,
+		req.UserID,
 		req.Title,
 		req.Description,
 		req.Priority,
@@ -172,21 +177,157 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 }
 
 // GetAll godoc
-// @Summary      Get all tasks
-// @Description  Retrieve a list of all tasks
+// @Summary      Get all tasks with filtering and pagination
+// @Description  Retrieve a list of tasks with optional filters (user_id, section_id, status, priority, parent_id) and pagination
 // @Tags         tasks
 // @Produce      json
-// @Success      200  {array}   dto.TaskResponse
+// @Security     BearerAuth
+// @Param        user_id     query     int  false  "Filter by user ID"
+// @Param        section_id  query     int  false  "Filter by section ID"
+// @Param        status      query     int  false  "Filter by status"
+// @Param        priority    query     int  false  "Filter by priority"
+// @Param        parent_id   query     int  false  "Filter by parent task ID"
+// @Param        page        query     int  false  "Page number (default: 1)"
+// @Param        page_size   query     int  false  "Page size (default: 20, max: 100)"
+// @Success      200  {object}  dto.TaskListResponse
 // @Failure      500  {object}  dto.ErrorResponse
 // @Router       /tasks [get]
 func (h *TaskHandler) GetAll(c *gin.Context) {
-	tasks, err := h.service.GetAll(c.Request.Context())
+	filter := &domain.TaskFilter{
+		Page:     1,
+		PageSize: 20,
+	}
+
+	if userID := c.Query("user_id"); userID != "" {
+		if id, err := strconv.ParseInt(userID, 10, 64); err == nil {
+			filter.UserID = &id
+		}
+	}
+
+	if sectionID := c.Query("section_id"); sectionID != "" {
+		if id, err := strconv.ParseInt(sectionID, 10, 64); err == nil {
+			filter.SectionID = &id
+		}
+	}
+
+	if status := c.Query("status"); status != "" {
+		if s, err := strconv.Atoi(status); err == nil {
+			filter.Status = &s
+		}
+	}
+
+	if priority := c.Query("priority"); priority != "" {
+		if p, err := strconv.Atoi(priority); err == nil {
+			filter.Priority = &p
+		}
+	}
+
+	if parentID := c.Query("parent_id"); parentID != "" {
+		if id, err := strconv.ParseInt(parentID, 10, 64); err == nil {
+			filter.ParentID = &id
+		}
+	}
+
+	if page := c.Query("page"); page != "" {
+		if p, err := strconv.Atoi(page); err == nil && p > 0 {
+			filter.Page = p
+		}
+	}
+
+	if pageSize := c.Query("page_size"); pageSize != "" {
+		if ps, err := strconv.Atoi(pageSize); err == nil && ps > 0 {
+			if ps > 100 {
+				ps = 100
+			}
+			filter.PageSize = ps
+		}
+	}
+
+	result, err := h.service.GetAllWithFilter(c.Request.Context(), filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ToTaskResponseList(tasks))
+	c.JSON(http.StatusOK, dto.ToTaskListResponse(result, filter.Page, filter.PageSize))
+}
+
+// GetMyTasks godoc
+// @Summary      Get current user's tasks with filtering and pagination
+// @Description  Retrieve tasks assigned to the authenticated user with optional filters (section_id, status, priority, parent_id) and pagination
+// @Tags         tasks
+// @Produce      json
+// @Security     BearerAuth
+// @Param        section_id  query     int  false  "Filter by section ID"
+// @Param        status      query     int  false  "Filter by status"
+// @Param        priority    query     int  false  "Filter by priority"
+// @Param        parent_id   query     int  false  "Filter by parent task ID"
+// @Param        page        query     int  false  "Page number (default: 1)"
+// @Param        page_size   query     int  false  "Page size (default: 20, max: 100)"
+// @Success      200  {object}  dto.TaskListResponse
+// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /tasks/my [get]
+func (h *TaskHandler) GetMyTasks(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
+	}
+
+	uid := userID.(int64)
+	filter := &domain.TaskFilter{
+		UserID:   &uid,
+		Page:     1,
+		PageSize: 20,
+	}
+
+	if sectionID := c.Query("section_id"); sectionID != "" {
+		if id, err := strconv.ParseInt(sectionID, 10, 64); err == nil {
+			filter.SectionID = &id
+		}
+	}
+
+	if status := c.Query("status"); status != "" {
+		if s, err := strconv.Atoi(status); err == nil {
+			filter.Status = &s
+		}
+	}
+
+	if priority := c.Query("priority"); priority != "" {
+		if p, err := strconv.Atoi(priority); err == nil {
+			filter.Priority = &p
+		}
+	}
+
+	if parentID := c.Query("parent_id"); parentID != "" {
+		if id, err := strconv.ParseInt(parentID, 10, 64); err == nil {
+			filter.ParentID = &id
+		}
+	}
+
+	if page := c.Query("page"); page != "" {
+		if p, err := strconv.Atoi(page); err == nil && p > 0 {
+			filter.Page = p
+		}
+	}
+
+	if pageSize := c.Query("page_size"); pageSize != "" {
+		if ps, err := strconv.Atoi(pageSize); err == nil && ps > 0 {
+			if ps > 100 {
+				ps = 100
+			}
+			filter.PageSize = ps
+		}
+	}
+
+	result, err := h.service.GetAllWithFilter(c.Request.Context(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ToTaskListResponse(result, filter.Page, filter.PageSize))
 }
 
 func (h *TaskHandler) RegisterRoutes(r *gin.RouterGroup) {
