@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ruziba3vich/sahiy_management/internal/domain/privilege"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/user"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,18 +25,16 @@ type Claims struct {
 }
 
 type Service struct {
-	userRepo      user.Repository
-	privilegeRepo privilege.Repository
-	jwtSecret     []byte
-	jwtExpiry     time.Duration
+	userRepo  user.Repository
+	jwtSecret []byte
+	jwtExpiry time.Duration
 }
 
-func NewService(userRepo user.Repository, privilegeRepo privilege.Repository, jwtSecret string, jwtExpiryHours int) *Service {
+func NewService(userRepo user.Repository, jwtSecret string, jwtExpiryHours int) *Service {
 	return &Service{
-		userRepo:      userRepo,
-		privilegeRepo: privilegeRepo,
-		jwtSecret:     []byte(jwtSecret),
-		jwtExpiry:     time.Duration(jwtExpiryHours) * time.Hour,
+		userRepo:  userRepo,
+		jwtSecret: []byte(jwtSecret),
+		jwtExpiry: time.Duration(jwtExpiryHours) * time.Hour,
 	}
 }
 
@@ -110,14 +107,6 @@ func (s *Service) RefreshToken(ctx context.Context, tokenString string) (string,
 	}
 
 	return s.generateToken(u)
-}
-
-func (s *Service) HasPrivilege(ctx context.Context, userID int64, role int, resource, action string) (bool, error) {
-	if role == privilege.RoleSuperAdmin {
-		return true, nil
-	}
-
-	return s.privilegeRepo.HasPrivilege(ctx, userID, resource, action)
 }
 
 func (s *Service) GetUserByID(ctx context.Context, id int64) (*user.User, error) {

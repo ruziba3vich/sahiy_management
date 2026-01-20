@@ -1,0 +1,66 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_NAME=${DB_NAME:-sahiy_management}
+      - DB_SSLMODE=disable
+      - JWT_SECRET=${JWT_SECRET:-your-256-bit-secret-change-in-production}
+      - JWT_EXPIRY_HOURS=${JWT_EXPIRY_HOURS:-24}
+      - PORT=8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    networks:
+      - sahiy-network
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-sahiy_management}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_EXTERNAL_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-sahiy_management}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - sahiy-network
+
+  migrate:
+    image: migrate/migrate:v4.17.0
+    volumes:
+      - ./migrations:/migrations
+    command: [
+      "-path", "/migrations",
+      "-database", "postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-sahiy_management}?sslmode=disable",
+      "up"
+    ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sahiy-network
+
+volumes:
+  postgres_data:
+
+networks:
+  sahiy-network:
+    driver: bridge

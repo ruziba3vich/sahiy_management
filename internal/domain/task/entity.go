@@ -10,6 +10,7 @@ type Task struct {
 	ID          int64
 	ParentID    pgtype.Int8
 	SectionID   int64
+	UserID      pgtype.Int8
 	Title       string
 	Description string
 	Priority    int
@@ -19,11 +20,12 @@ type Task struct {
 	UpdatedAt   int64
 }
 
-func NewTask(parentID pgtype.Int8, sectionID int64, title, description string, priority int, deadline int64, status int) *Task {
+func NewTask(parentID pgtype.Int8, sectionID int64, userID pgtype.Int8, title, description string, priority int, deadline int64, status int) *Task {
 	now := time.Now().Unix()
 	return &Task{
 		ParentID:    parentID,
 		SectionID:   sectionID,
+		UserID:      userID,
 		Title:       title,
 		Description: description,
 		Priority:    priority,
@@ -34,9 +36,10 @@ func NewTask(parentID pgtype.Int8, sectionID int64, title, description string, p
 	}
 }
 
-func (t *Task) Update(parentID pgtype.Int8, sectionID int64, title, description string, priority int, deadline int64, status int) {
+func (t *Task) Update(parentID pgtype.Int8, sectionID int64, userID pgtype.Int8, title, description string, priority int, deadline int64, status int) {
 	t.ParentID = parentID
 	t.SectionID = sectionID
+	t.UserID = userID
 	t.Title = title
 	t.Description = description
 	t.Priority = priority

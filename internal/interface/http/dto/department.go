@@ -4,7 +4,7 @@ import domain "github.com/ruziba3vich/sahiy_management/internal/domain/departmen
 
 type CreateDepartmentRequest struct {
 	Name   string `json:"name" binding:"required" example:"Engineering"`
-	Status int    `json:"status" binding:"required" example:"1"`
+	Status *int   `json:"status" example:"1"`
 }
 
 type UpdateDepartmentRequest struct {
