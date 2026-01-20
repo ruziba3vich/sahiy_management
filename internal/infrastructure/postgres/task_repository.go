@@ -208,7 +208,7 @@ func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.
 	}
 
 	// Get paginated results
-	selectQuery := `SELECT id, parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at ` + baseQuery + ` ORDER BY id DESC`
+	selectQuery := `SELECT id, parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at ` + baseQuery + ` ORDER BY created_at DESC`
 
 	if filter.PageSize > 0 {
 		offset := (filter.Page - 1) * filter.PageSize

@@ -40,3 +40,7 @@ func (s *Service) GetByID(ctx context.Context, id int64) (*domain.TaskHistory, e
 func (s *Service) GetAll(ctx context.Context) ([]*domain.TaskHistory, error) {
 	return s.repo.GetAllTaskHistories(ctx)
 }
+
+func (s *Service) GetAllWithFilter(ctx context.Context, filter *domain.TaskHistoryFilter) (*domain.TaskHistoryListResult, error) {
+	return s.repo.GetTaskHistoriesWithFilter(ctx, filter)
+}

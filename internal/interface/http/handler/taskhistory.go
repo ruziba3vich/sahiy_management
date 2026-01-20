@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	appTH "github.com/ruziba3vich/sahiy_management/internal/application/taskhistory"
+	domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskhistory"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/dto"
 )
@@ -153,21 +154,129 @@ func (h *TaskHistoryHandler) GetByID(c *gin.Context) {
 }
 
 // GetAll godoc
-// @Summary      Get all task histories
-// @Description  Retrieve a list of all task histories
+// @Summary      Get all task histories with filtering and pagination
+// @Description  Retrieve a list of task histories with optional filters (user_id, task_id, status) and pagination
 // @Tags         task-histories
 // @Produce      json
-// @Success      200  {array}   dto.TaskHistoryResponse
+// @Security     BearerAuth
+// @Param        user_id    query     int  false  "Filter by user ID"
+// @Param        task_id    query     int  false  "Filter by task ID"
+// @Param        status     query     int  false  "Filter by status"
+// @Param        page       query     int  false  "Page number (default: 1)"
+// @Param        page_size  query     int  false  "Page size (default: 20, max: 100)"
+// @Success      200  {object}  dto.TaskHistoryListResponse
 // @Failure      500  {object}  dto.ErrorResponse
 // @Router       /task-histories [get]
 func (h *TaskHistoryHandler) GetAll(c *gin.Context) {
-	histories, err := h.service.GetAll(c.Request.Context())
+	filter := &domain.TaskHistoryFilter{
+		Page:     1,
+		PageSize: 20,
+	}
+
+	if userID := c.Query("user_id"); userID != "" {
+		if id, err := strconv.ParseInt(userID, 10, 64); err == nil {
+			filter.UserID = &id
+		}
+	}
+
+	if taskID := c.Query("task_id"); taskID != "" {
+		if id, err := strconv.ParseInt(taskID, 10, 64); err == nil {
+			filter.TaskID = &id
+		}
+	}
+
+	if status := c.Query("status"); status != "" {
+		if s, err := strconv.Atoi(status); err == nil {
+			filter.Status = &s
+		}
+	}
+
+	if page := c.Query("page"); page != "" {
+		if p, err := strconv.Atoi(page); err == nil && p > 0 {
+			filter.Page = p
+		}
+	}
+
+	if pageSize := c.Query("page_size"); pageSize != "" {
+		if ps, err := strconv.Atoi(pageSize); err == nil && ps > 0 {
+			if ps > 100 {
+				ps = 100
+			}
+			filter.PageSize = ps
+		}
+	}
+
+	result, err := h.service.GetAllWithFilter(c.Request.Context(), filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ToTaskHistoryResponseList(histories))
+	c.JSON(http.StatusOK, dto.ToTaskHistoryListResponse(result, filter.Page, filter.PageSize))
+}
+
+// GetMyHistory godoc
+// @Summary      Get current user's task histories with filtering and pagination
+// @Description  Retrieve task histories for the authenticated user with optional filters (task_id, status) and pagination
+// @Tags         task-histories
+// @Produce      json
+// @Security     BearerAuth
+// @Param        task_id    query     int  false  "Filter by task ID"
+// @Param        status     query     int  false  "Filter by status"
+// @Param        page       query     int  false  "Page number (default: 1)"
+// @Param        page_size  query     int  false  "Page size (default: 20, max: 100)"
+// @Success      200  {object}  dto.TaskHistoryListResponse
+// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /task-histories/my [get]
+func (h *TaskHistoryHandler) GetMyHistory(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
+	}
+
+	uid := userID.(int64)
+	filter := &domain.TaskHistoryFilter{
+		UserID:   &uid,
+		Page:     1,
+		PageSize: 20,
+	}
+
+	if taskID := c.Query("task_id"); taskID != "" {
+		if id, err := strconv.ParseInt(taskID, 10, 64); err == nil {
+			filter.TaskID = &id
+		}
+	}
+
+	if status := c.Query("status"); status != "" {
+		if s, err := strconv.Atoi(status); err == nil {
+			filter.Status = &s
+		}
+	}
+
+	if page := c.Query("page"); page != "" {
+		if p, err := strconv.Atoi(page); err == nil && p > 0 {
+			filter.Page = p
+		}
+	}
+
+	if pageSize := c.Query("page_size"); pageSize != "" {
+		if ps, err := strconv.Atoi(pageSize); err == nil && ps > 0 {
+			if ps > 100 {
+				ps = 100
+			}
+			filter.PageSize = ps
+		}
+	}
+
+	result, err := h.service.GetAllWithFilter(c.Request.Context(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ToTaskHistoryListResponse(result, filter.Page, filter.PageSize))
 }
 
 func (h *TaskHistoryHandler) RegisterRoutes(r *gin.RouterGroup) {
