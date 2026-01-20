@@ -61,6 +61,7 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 
 	// Tasks
 	registerCRUD(protected, "/tasks", taskHandler)
+	protected.GET("/tasks/my", taskHandler.GetMyTasks)
 
 	// Task Histories
 	registerCRUD(protected, "/task-histories", thHandler)
