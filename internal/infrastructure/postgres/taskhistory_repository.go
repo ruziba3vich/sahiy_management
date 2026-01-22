@@ -84,9 +84,20 @@ func (r *TaskHistoryRepository) DeleteTaskHistory(ctx context.Context, id int64)
 
 func (r *TaskHistoryRepository) GetTaskHistoryByID(ctx context.Context, id int64) (*domain.TaskHistory, error) {
 	query := `
-		SELECT id, task_id, user_id, status, started_at, finished_at
-		FROM task_histories
-		WHERE id = $1
+		SELECT 
+			th.id, 
+			th.task_id, 
+			th.user_id, 
+			th.status, 
+			th.started_at, 
+			th.finished_at,
+			COALESCE(u.full_name, '') as user_full_name,
+			COALESCE(ts.name, '') as status_name,
+			COALESCE(ts.color, '') as status_color
+		FROM task_histories th
+		LEFT JOIN users u ON th.user_id = u.id
+		LEFT JOIN task_statuses ts ON th.status = ts.id
+		WHERE th.id = $1
 	`
 
 	th := &domain.TaskHistory{}
@@ -97,6 +108,9 @@ func (r *TaskHistoryRepository) GetTaskHistoryByID(ctx context.Context, id int64
 		&th.Status,
 		&th.StartedAt,
 		&th.FinishedAt,
+		&th.UserFullName,
+		&th.StatusName,
+		&th.Color,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -110,9 +124,20 @@ func (r *TaskHistoryRepository) GetTaskHistoryByID(ctx context.Context, id int64
 
 func (r *TaskHistoryRepository) GetAllTaskHistories(ctx context.Context) ([]*domain.TaskHistory, error) {
 	query := `
-		SELECT id, task_id, user_id, status, started_at, finished_at
-		FROM task_histories
-		ORDER BY id
+		SELECT 
+			th.id, 
+			th.task_id, 
+			th.user_id, 
+			th.status, 
+			th.started_at, 
+			th.finished_at,
+			COALESCE(u.full_name, '') as user_full_name,
+			COALESCE(ts.name, '') as status_name,
+			COALESCE(ts.color, '') as status_color
+		FROM task_histories th
+		LEFT JOIN users u ON th.user_id = u.id
+		LEFT JOIN task_statuses ts ON th.status = ts.id
+		ORDER BY th.id
 	`
 
 	rows, err := r.db.Query(ctx, query)
@@ -131,6 +156,9 @@ func (r *TaskHistoryRepository) GetAllTaskHistories(ctx context.Context) ([]*dom
 			&th.Status,
 			&th.StartedAt,
 			&th.FinishedAt,
+			&th.UserFullName,
+			&th.StatusName,
+			&th.Color,
 		)
 		if err != nil {
 			return nil, err
@@ -146,25 +174,29 @@ func (r *TaskHistoryRepository) GetAllTaskHistories(ctx context.Context) ([]*dom
 }
 
 func (r *TaskHistoryRepository) GetTaskHistoriesWithFilter(ctx context.Context, filter *domain.TaskHistoryFilter) (*domain.TaskHistoryListResult, error) {
-	baseQuery := `FROM task_histories WHERE 1=1`
+	baseQuery := `
+		FROM task_histories th
+		LEFT JOIN users u ON th.user_id = u.id
+		LEFT JOIN task_statuses ts ON th.status = ts.id
+		WHERE 1=1`
 	args := []interface{}{}
 	argCount := 0
 
 	if filter.UserID != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND user_id = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND th.user_id = $%d", argCount)
 		args = append(args, *filter.UserID)
 	}
 
 	if filter.TaskID != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND task_id = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND th.task_id = $%d", argCount)
 		args = append(args, *filter.TaskID)
 	}
 
 	if filter.Status != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND status = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND th.status = $%d", argCount)
 		args = append(args, *filter.Status)
 	}
 
@@ -176,8 +208,19 @@ func (r *TaskHistoryRepository) GetTaskHistoriesWithFilter(ctx context.Context, 
 		return nil, err
 	}
 
-	// Get paginated results
-	selectQuery := `SELECT id, task_id, user_id, status, started_at, finished_at ` + baseQuery + ` ORDER BY started_at DESC`
+	// Get paginated results with joined data
+	selectQuery := `
+		SELECT 
+			th.id, 
+			th.task_id, 
+			th.user_id, 
+			th.status, 
+			th.started_at, 
+			th.finished_at,
+			COALESCE(u.full_name, '') as user_full_name,
+			COALESCE(ts.name, '') as status_name,
+			COALESCE(ts.color, '') as status_color
+		` + baseQuery + ` ORDER BY th.started_at DESC`
 
 	if filter.PageSize > 0 {
 		offset := (filter.Page - 1) * filter.PageSize
@@ -208,6 +251,9 @@ func (r *TaskHistoryRepository) GetTaskHistoriesWithFilter(ctx context.Context, 
 			&th.Status,
 			&th.StartedAt,
 			&th.FinishedAt,
+			&th.UserFullName,
+			&th.StatusName,
+			&th.Color,
 		)
 		if err != nil {
 			return nil, err

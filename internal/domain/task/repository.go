@@ -3,13 +3,14 @@ package task
 import "context"
 
 type TaskFilter struct {
-	UserID    *int64
-	SectionID *int64
-	Status    *int
-	Priority  *int
-	ParentID  *int64
-	Page      int
-	PageSize  int
+	AssigneeID *int64
+	ReviewerID *int64
+	SectionID  *int64
+	Status     *int
+	Priority   *int
+	ParentID   *int64
+	Page       int
+	PageSize   int
 }
 
 type TaskListResult struct {
