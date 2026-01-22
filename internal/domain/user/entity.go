@@ -6,7 +6,7 @@ type User struct {
 	ID           int64
 	DepartmentID int64
 	SectionID    int64
-	ScheduleID   int64
+	ScheduleID   *int64
 	Role         int
 	Phone        string
 	FullName     string
@@ -17,7 +17,7 @@ type User struct {
 	PasswordHash string
 }
 
-func NewUser(departmentID, sectionID, scheduleID int64, role int, phone, fullName, passwordHash string, tgChatID int64) *User {
+func NewUser(departmentID, sectionID int64, scheduleID *int64, role int, phone, fullName, passwordHash string, tgChatID int64) *User {
 	now := time.Now().Unix()
 	return &User{
 		DepartmentID: departmentID,
@@ -34,13 +34,16 @@ func NewUser(departmentID, sectionID, scheduleID int64, role int, phone, fullNam
 	}
 }
 
-func (u *User) Update(departmentID, sectionID, scheduleID int64, role int, phone, fullName string, tgChatID int64) {
+func (u *User) Update(departmentID, sectionID int64, scheduleID *int64, role int, phone, fullName string, joinedAt, tgChatID int64) {
 	u.DepartmentID = departmentID
 	u.SectionID = sectionID
-	u.ScheduleID = scheduleID
+	if scheduleID != nil {
+		u.ScheduleID = scheduleID
+	}
 	u.Role = role
 	u.Phone = phone
 	u.FullName = fullName
+	u.JoinedAt = joinedAt
 	u.TgChatID = tgChatID
 	u.UpdatedAt = time.Now().Unix()
 }

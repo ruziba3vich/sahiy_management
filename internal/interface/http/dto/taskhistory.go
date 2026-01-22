@@ -16,21 +16,27 @@ type UpdateTaskHistoryRequest struct {
 }
 
 type TaskHistoryResponse struct {
-	ID         int64  `json:"id" example:"1"`
-	TaskID     int64  `json:"task_id" example:"1"`
-	UserID     int64  `json:"user_id" example:"1"`
-	Status     int    `json:"status" example:"1"`
-	StartedAt  int64  `json:"started_at" example:"1737277200"`
-	FinishedAt *int64 `json:"finished_at,omitempty" example:"1737363600"`
+	ID           int64  `json:"id" example:"1"`
+	TaskID       int64  `json:"task_id" example:"1"`
+	UserID       int64  `json:"user_id" example:"1"`
+	UserFullName string `json:"user_full_name" example:"John Doe"`
+	Status       int    `json:"status" example:"1"`
+	StatusName   string `json:"status_name" example:"In Progress"`
+	StatusColor  string `json:"status_color" example:"#ffffff"`
+	StartedAt    int64  `json:"started_at" example:"1737277200"`
+	FinishedAt   *int64 `json:"finished_at,omitempty" example:"1737363600"`
 }
 
 func ToTaskHistoryResponse(th *domain.TaskHistory) *TaskHistoryResponse {
 	resp := &TaskHistoryResponse{
-		ID:        th.ID,
-		TaskID:    th.TaskID,
-		UserID:    th.UserID,
-		Status:    th.Status,
-		StartedAt: th.StartedAt,
+		ID:           th.ID,
+		TaskID:       th.TaskID,
+		UserID:       th.UserID,
+		UserFullName: th.UserFullName,
+		Status:       th.Status,
+		StatusName:   th.StatusName,
+		StatusColor:  th.Color,
+		StartedAt:    th.StartedAt,
 	}
 	if th.FinishedAt.Valid {
 		resp.FinishedAt = &th.FinishedAt.Int64

@@ -98,6 +98,7 @@ func (h *UserHandler) Update(c *gin.Context) {
 		req.Role,
 		req.Phone,
 		req.FullName,
+		req.JoinedAt,
 		req.TgChatID,
 	)
 	if err != nil {

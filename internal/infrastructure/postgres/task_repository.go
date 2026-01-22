@@ -6,8 +6,10 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
+	userDomain "github.com/ruziba3vich/sahiy_management/internal/domain/user"
 )
 
 var ErrTaskNotFound = errors.New("task not found")
@@ -22,15 +24,16 @@ func NewTaskRepository(db *pgxpool.Pool) domain.Repository {
 
 func (r *TaskRepository) CreateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
 	query := `
-		INSERT INTO tasks (parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO tasks (parent_id, section_id, assignee_id, reviewer_id, title, description, priority, deadline, status, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id
 	`
 
 	err := r.db.QueryRow(ctx, query,
 		task.ParentID,
 		task.SectionID,
-		task.UserID,
+		task.AssigneeID,
+		task.ReviewerID,
 		task.Title,
 		task.Description,
 		task.Priority,
@@ -49,14 +52,15 @@ func (r *TaskRepository) CreateTask(ctx context.Context, task *domain.Task) (*do
 func (r *TaskRepository) UpdateTask(ctx context.Context, task *domain.Task) (*domain.Task, error) {
 	query := `
 		UPDATE tasks
-		SET parent_id = $1, section_id = $2, user_id = $3, title = $4, description = $5, priority = $6, deadline = $7, status = $8, updated_at = $9
-		WHERE id = $10
+		SET parent_id = $1, section_id = $2, assignee_id = $3, reviewer_id = $4, title = $5, description = $6, priority = $7, deadline = $8, status = $9, updated_at = $10
+		WHERE id = $11
 	`
 
 	result, err := r.db.Exec(ctx, query,
 		task.ParentID,
 		task.SectionID,
-		task.UserID,
+		task.AssigneeID,
+		task.ReviewerID,
 		task.Title,
 		task.Description,
 		task.Priority,
@@ -93,17 +97,30 @@ func (r *TaskRepository) DeleteTask(ctx context.Context, id int64) error {
 
 func (r *TaskRepository) GetTaskByID(ctx context.Context, id int64) (*domain.Task, error) {
 	query := `
-		SELECT id, parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at
-		FROM tasks
-		WHERE id = $1
+		SELECT 
+			t.id, t.parent_id, t.section_id, t.assignee_id, t.reviewer_id, t.title, t.description, t.priority, t.deadline, t.status, t.created_at, t.updated_at,
+			ua.id, ua.department_id, ua.section_id, ua.schedule_id, ua.role, ua.phone, ua.full_name, ua.joined_at, ua.created_at, ua.updated_at, ua.tg_chat_id,
+			ur.id, ur.department_id, ur.section_id, ur.schedule_id, ur.role, ur.phone, ur.full_name, ur.joined_at, ur.created_at, ur.updated_at, ur.tg_chat_id
+		FROM tasks t
+		LEFT JOIN users ua ON t.assignee_id = ua.id
+		LEFT JOIN users ur ON t.reviewer_id = ur.id
+		WHERE t.id = $1
 	`
 
 	task := &domain.Task{}
+	var aID, aDepID, aSecID, aRole, aJoinedAt, aCreatedAt, aUpdatedAt, aTgChatID pgtype.Int8
+	var aSchedID pgtype.Int8
+	var aPhone, aFullName pgtype.Text
+	var rID, rDepID, rSecID, rRole, rJoinedAt, rCreatedAt, rUpdatedAt, rTgChatID pgtype.Int8
+	var rSchedID pgtype.Int8
+	var rPhone, rFullName pgtype.Text
+
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&task.ID,
 		&task.ParentID,
 		&task.SectionID,
-		&task.UserID,
+		&task.AssigneeID,
+		&task.ReviewerID,
 		&task.Title,
 		&task.Description,
 		&task.Priority,
@@ -111,6 +128,8 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id int64) (*domain.Tas
 		&task.Status,
 		&task.CreatedAt,
 		&task.UpdatedAt,
+		&aID, &aDepID, &aSecID, &aSchedID, &aRole, &aPhone, &aFullName, &aJoinedAt, &aCreatedAt, &aUpdatedAt, &aTgChatID,
+		&rID, &rDepID, &rSecID, &rSchedID, &rRole, &rPhone, &rFullName, &rJoinedAt, &rCreatedAt, &rUpdatedAt, &rTgChatID,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -119,14 +138,55 @@ func (r *TaskRepository) GetTaskByID(ctx context.Context, id int64) (*domain.Tas
 		return nil, err
 	}
 
+	if aID.Valid {
+		task.Assignee = &userDomain.User{
+			ID:           aID.Int64,
+			DepartmentID: aDepID.Int64,
+			SectionID:    aSecID.Int64,
+			Role:         int(aRole.Int64),
+			Phone:        aPhone.String,
+			FullName:     aFullName.String,
+			JoinedAt:     aJoinedAt.Int64,
+			CreatedAt:    aCreatedAt.Int64,
+			UpdatedAt:    aUpdatedAt.Int64,
+			TgChatID:     aTgChatID.Int64,
+		}
+		if aSchedID.Valid {
+			task.Assignee.ScheduleID = &aSchedID.Int64
+		}
+	}
+
+	if rID.Valid {
+		task.Reviewer = &userDomain.User{
+			ID:           rID.Int64,
+			DepartmentID: rDepID.Int64,
+			SectionID:    rSecID.Int64,
+			Role:         int(rRole.Int64),
+			Phone:        rPhone.String,
+			FullName:     rFullName.String,
+			JoinedAt:     rJoinedAt.Int64,
+			CreatedAt:    rCreatedAt.Int64,
+			UpdatedAt:    rUpdatedAt.Int64,
+			TgChatID:     rTgChatID.Int64,
+		}
+		if rSchedID.Valid {
+			task.Reviewer.ScheduleID = &rSchedID.Int64
+		}
+	}
+
 	return task, nil
 }
 
 func (r *TaskRepository) GetAllTasks(ctx context.Context) ([]*domain.Task, error) {
 	query := `
-		SELECT id, parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at
-		FROM tasks
-		ORDER BY id
+		SELECT 
+			t.id, t.parent_id, t.section_id, t.assignee_id, t.reviewer_id, t.title, t.description, t.priority, t.deadline, t.status, t.created_at, t.updated_at,
+			ua.id, ua.department_id, ua.section_id, ua.schedule_id, ua.role, ua.phone, ua.full_name, ua.joined_at, ua.created_at, ua.updated_at, ua.tg_chat_id,
+			ur.id, ur.department_id, ur.section_id, ur.schedule_id, ur.role, ur.phone, ur.full_name, ur.joined_at, ur.created_at, ur.updated_at, ur.tg_chat_id
+		FROM tasks t
+		LEFT JOIN users ua ON t.assignee_id = ua.id
+		LEFT JOIN users ur ON t.reviewer_id = ur.id
+		ORDER BY t.id
 	`
 
 	rows, err := r.db.Query(ctx, query)
@@ -138,11 +198,19 @@ func (r *TaskRepository) GetAllTasks(ctx context.Context) ([]*domain.Task, error
 	var tasks []*domain.Task
 	for rows.Next() {
 		task := &domain.Task{}
+		var aID, aDepID, aSecID, aRole, aJoinedAt, aCreatedAt, aUpdatedAt, aTgChatID pgtype.Int8
+		var aSchedID pgtype.Int8
+		var aPhone, aFullName pgtype.Text
+		var rID, rDepID, rSecID, rRole, rJoinedAt, rCreatedAt, rUpdatedAt, rTgChatID pgtype.Int8
+		var rSchedID pgtype.Int8
+		var rPhone, rFullName pgtype.Text
+
 		err := rows.Scan(
 			&task.ID,
 			&task.ParentID,
 			&task.SectionID,
-			&task.UserID,
+			&task.AssigneeID,
+			&task.ReviewerID,
 			&task.Title,
 			&task.Description,
 			&task.Priority,
@@ -150,10 +218,49 @@ func (r *TaskRepository) GetAllTasks(ctx context.Context) ([]*domain.Task, error
 			&task.Status,
 			&task.CreatedAt,
 			&task.UpdatedAt,
+			&aID, &aDepID, &aSecID, &aSchedID, &aRole, &aPhone, &aFullName, &aJoinedAt, &aCreatedAt, &aUpdatedAt, &aTgChatID,
+			&rID, &rDepID, &rSecID, &rSchedID, &rRole, &rPhone, &rFullName, &rJoinedAt, &rCreatedAt, &rUpdatedAt, &rTgChatID,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		if aID.Valid {
+			task.Assignee = &userDomain.User{
+				ID:           aID.Int64,
+				DepartmentID: aDepID.Int64,
+				SectionID:    aSecID.Int64,
+				Role:         int(aRole.Int64),
+				Phone:        aPhone.String,
+				FullName:     aFullName.String,
+				JoinedAt:     aJoinedAt.Int64,
+				CreatedAt:    aCreatedAt.Int64,
+				UpdatedAt:    aUpdatedAt.Int64,
+				TgChatID:     aTgChatID.Int64,
+			}
+			if aSchedID.Valid {
+				task.Assignee.ScheduleID = &aSchedID.Int64
+			}
+		}
+
+		if rID.Valid {
+			task.Reviewer = &userDomain.User{
+				ID:           rID.Int64,
+				DepartmentID: rDepID.Int64,
+				SectionID:    rSecID.Int64,
+				Role:         int(rRole.Int64),
+				Phone:        rPhone.String,
+				FullName:     rFullName.String,
+				JoinedAt:     rJoinedAt.Int64,
+				CreatedAt:    rCreatedAt.Int64,
+				UpdatedAt:    rUpdatedAt.Int64,
+				TgChatID:     rTgChatID.Int64,
+			}
+			if rSchedID.Valid {
+				task.Reviewer.ScheduleID = &rSchedID.Int64
+			}
+		}
+
 		tasks = append(tasks, task)
 	}
 
@@ -165,37 +272,46 @@ func (r *TaskRepository) GetAllTasks(ctx context.Context) ([]*domain.Task, error
 }
 
 func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.TaskFilter) (*domain.TaskListResult, error) {
-	baseQuery := `FROM tasks WHERE 1=1`
+	baseQuery := `FROM tasks t 
+	LEFT JOIN users ua ON t.assignee_id = ua.id
+	LEFT JOIN users ur ON t.reviewer_id = ur.id
+	WHERE 1=1`
 	args := []interface{}{}
 	argCount := 0
 
-	if filter.UserID != nil {
+	if filter.AssigneeID != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND user_id = $%d", argCount)
-		args = append(args, *filter.UserID)
+		baseQuery += fmt.Sprintf(" AND t.assignee_id = $%d", argCount)
+		args = append(args, *filter.AssigneeID)
+	}
+
+	if filter.ReviewerID != nil {
+		argCount++
+		baseQuery += fmt.Sprintf(" AND t.reviewer_id = $%d", argCount)
+		args = append(args, *filter.ReviewerID)
 	}
 
 	if filter.SectionID != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND section_id = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND t.section_id = $%d", argCount)
 		args = append(args, *filter.SectionID)
 	}
 
 	if filter.Status != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND status = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND t.status = $%d", argCount)
 		args = append(args, *filter.Status)
 	}
 
 	if filter.Priority != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND priority = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND t.priority = $%d", argCount)
 		args = append(args, *filter.Priority)
 	}
 
 	if filter.ParentID != nil {
 		argCount++
-		baseQuery += fmt.Sprintf(" AND parent_id = $%d", argCount)
+		baseQuery += fmt.Sprintf(" AND t.parent_id = $%d", argCount)
 		args = append(args, *filter.ParentID)
 	}
 
@@ -208,7 +324,11 @@ func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.
 	}
 
 	// Get paginated results
-	selectQuery := `SELECT id, parent_id, section_id, user_id, title, description, priority, deadline, status, created_at, updated_at ` + baseQuery + ` ORDER BY created_at DESC`
+	selectQuery := `SELECT 
+		t.id, t.parent_id, t.section_id, t.assignee_id, t.reviewer_id, t.title, t.description, t.priority, t.deadline, t.status, t.created_at, t.updated_at,
+		ua.id, ua.department_id, ua.section_id, ua.schedule_id, ua.role, ua.phone, ua.full_name, ua.joined_at, ua.created_at, ua.updated_at, ua.tg_chat_id,
+		ur.id, ur.department_id, ur.section_id, ur.schedule_id, ur.role, ur.phone, ur.full_name, ur.joined_at, ur.created_at, ur.updated_at, ur.tg_chat_id
+	` + baseQuery + ` ORDER BY t.created_at DESC`
 
 	if filter.PageSize > 0 {
 		offset := (filter.Page - 1) * filter.PageSize
@@ -232,11 +352,19 @@ func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.
 	var tasks []*domain.Task
 	for rows.Next() {
 		task := &domain.Task{}
+		var aID, aDepID, aSecID, aRole, aJoinedAt, aCreatedAt, aUpdatedAt, aTgChatID pgtype.Int8
+		var aSchedID pgtype.Int8
+		var aPhone, aFullName pgtype.Text
+		var rID, rDepID, rSecID, rRole, rJoinedAt, rCreatedAt, rUpdatedAt, rTgChatID pgtype.Int8
+		var rSchedID pgtype.Int8
+		var rPhone, rFullName pgtype.Text
+
 		err := rows.Scan(
 			&task.ID,
 			&task.ParentID,
 			&task.SectionID,
-			&task.UserID,
+			&task.AssigneeID,
+			&task.ReviewerID,
 			&task.Title,
 			&task.Description,
 			&task.Priority,
@@ -244,10 +372,49 @@ func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.
 			&task.Status,
 			&task.CreatedAt,
 			&task.UpdatedAt,
+			&aID, &aDepID, &aSecID, &aSchedID, &aRole, &aPhone, &aFullName, &aJoinedAt, &aCreatedAt, &aUpdatedAt, &aTgChatID,
+			&rID, &rDepID, &rSecID, &rSchedID, &rRole, &rPhone, &rFullName, &rJoinedAt, &rCreatedAt, &rUpdatedAt, &rTgChatID,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		if aID.Valid {
+			task.Assignee = &userDomain.User{
+				ID:           aID.Int64,
+				DepartmentID: aDepID.Int64,
+				SectionID:    aSecID.Int64,
+				Role:         int(aRole.Int64),
+				Phone:        aPhone.String,
+				FullName:     aFullName.String,
+				JoinedAt:     aJoinedAt.Int64,
+				CreatedAt:    aCreatedAt.Int64,
+				UpdatedAt:    aUpdatedAt.Int64,
+				TgChatID:     aTgChatID.Int64,
+			}
+			if aSchedID.Valid {
+				task.Assignee.ScheduleID = &aSchedID.Int64
+			}
+		}
+
+		if rID.Valid {
+			task.Reviewer = &userDomain.User{
+				ID:           rID.Int64,
+				DepartmentID: rDepID.Int64,
+				SectionID:    rSecID.Int64,
+				Role:         int(rRole.Int64),
+				Phone:        rPhone.String,
+				FullName:     rFullName.String,
+				JoinedAt:     rJoinedAt.Int64,
+				CreatedAt:    rCreatedAt.Int64,
+				UpdatedAt:    rUpdatedAt.Int64,
+				TgChatID:     rTgChatID.Int64,
+			}
+			if rSchedID.Valid {
+				task.Reviewer.ScheduleID = &rSchedID.Int64
+			}
+		}
+
 		tasks = append(tasks, task)
 	}
 
