@@ -22,7 +22,7 @@ func NewTaskHandler(service *appTask.Service) *TaskHandler {
 
 // Create godoc
 // @Summary      Create a new task
-// @Description  Create a new task with the provided data
+// @Description  Create a new task with the provided data. If reviewer_id is not provided, it defaults to the authenticated user
 // @Tags         tasks
 // @Accept       json
 // @Produce      json
@@ -30,6 +30,7 @@ func NewTaskHandler(service *appTask.Service) *TaskHandler {
 // @Param        request  body      dto.CreateTaskRequest  true  "Task data"
 // @Success      201      {object}  dto.TaskResponse
 // @Failure      400      {object}  dto.ErrorResponse
+// @Failure      401      {object}  dto.ErrorResponse
 // @Failure      500      {object}  dto.ErrorResponse
 // @Router       /tasks [post]
 func (h *TaskHandler) Create(c *gin.Context) {
@@ -37,6 +38,20 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
 		return
+	}
+
+	// Get authenticated user ID
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Error: "user not authenticated"})
+		return
+	}
+
+	// If reviewer_id is not provided, set it to the authenticated user (task creator)
+	reviewerID := req.ReviewerID
+	if reviewerID == nil {
+		uid := userID.(int64)
+		reviewerID = &uid
 	}
 
 	status := 1
@@ -48,7 +63,8 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		c.Request.Context(),
 		req.ParentID,
 		req.SectionID,
-		req.UserID,
+		req.AssigneeID,
+		reviewerID,
 		req.Title,
 		req.Description,
 		req.Priority,
@@ -95,7 +111,8 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		id,
 		req.ParentID,
 		req.SectionID,
-		req.UserID,
+		req.AssigneeID,
+		req.ReviewerID,
 		req.Title,
 		req.Description,
 		req.Priority,
@@ -178,11 +195,12 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 
 // GetAll godoc
 // @Summary      Get all tasks with filtering and pagination
-// @Description  Retrieve a list of tasks with optional filters (user_id, section_id, status, priority, parent_id) and pagination
+// @Description  Retrieve a list of tasks with optional filters (assignee_id, reviewer_id, section_id, status, priority, parent_id) and pagination
 // @Tags         tasks
 // @Produce      json
 // @Security     BearerAuth
-// @Param        user_id     query     int  false  "Filter by user ID"
+// @Param        assignee_id query     int  false  "Filter by assignee user ID"
+// @Param        reviewer_id query     int  false  "Filter by reviewer user ID"
 // @Param        section_id  query     int  false  "Filter by section ID"
 // @Param        status      query     int  false  "Filter by status"
 // @Param        priority    query     int  false  "Filter by priority"
@@ -198,9 +216,15 @@ func (h *TaskHandler) GetAll(c *gin.Context) {
 		PageSize: 20,
 	}
 
-	if userID := c.Query("user_id"); userID != "" {
-		if id, err := strconv.ParseInt(userID, 10, 64); err == nil {
-			filter.UserID = &id
+	if assigneeID := c.Query("assignee_id"); assigneeID != "" {
+		if id, err := strconv.ParseInt(assigneeID, 10, 64); err == nil {
+			filter.AssigneeID = &id
+		}
+	}
+
+	if reviewerID := c.Query("reviewer_id"); reviewerID != "" {
+		if id, err := strconv.ParseInt(reviewerID, 10, 64); err == nil {
+			filter.ReviewerID = &id
 		}
 	}
 
@@ -249,12 +273,13 @@ func (h *TaskHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ToTaskListResponse(result, filter.Page, filter.PageSize))
+	// Return hierarchical structure with subtasks nested in parent tasks
+	c.JSON(http.StatusOK, dto.ToHierarchicalTaskListResponse(result, filter.Page, filter.PageSize))
 }
 
 // GetMyTasks godoc
 // @Summary      Get current user's tasks with filtering and pagination
-// @Description  Retrieve tasks assigned to the authenticated user with optional filters (section_id, status, priority, parent_id) and pagination
+// @Description  Retrieve tasks where the authenticated user is the assignee with optional filters (section_id, status, priority, parent_id) and pagination
 // @Tags         tasks
 // @Produce      json
 // @Security     BearerAuth
@@ -277,9 +302,9 @@ func (h *TaskHandler) GetMyTasks(c *gin.Context) {
 
 	uid := userID.(int64)
 	filter := &domain.TaskFilter{
-		UserID:   &uid,
-		Page:     1,
-		PageSize: 20,
+		AssigneeID: &uid,
+		Page:       1,
+		PageSize:   20,
 	}
 
 	if sectionID := c.Query("section_id"); sectionID != "" {
@@ -327,7 +352,8 @@ func (h *TaskHandler) GetMyTasks(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.ToTaskListResponse(result, filter.Page, filter.PageSize))
+	// Return hierarchical structure with subtasks nested in parent tasks
+	c.JSON(http.StatusOK, dto.ToHierarchicalTaskListResponse(result, filter.Page, filter.PageSize))
 }
 
 func (h *TaskHandler) RegisterRoutes(r *gin.RouterGroup) {

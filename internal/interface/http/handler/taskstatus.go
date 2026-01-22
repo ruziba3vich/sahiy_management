@@ -21,7 +21,7 @@ func NewTaskStatusHandler(service *appTS.Service) *TaskStatusHandler {
 
 // Create godoc
 // @Summary      Create a new task status
-// @Description  Create a new task status with the provided name and type
+// @Description  Create a new task status with the provided name and section ID
 // @Tags         task-statuses
 // @Accept       json
 // @Produce      json
@@ -37,7 +37,7 @@ func (h *TaskStatusHandler) Create(c *gin.Context) {
 		return
 	}
 
-	ts, err := h.service.Create(c.Request.Context(), req.Name, req.Type)
+	ts, err := h.service.Create(c.Request.Context(), req.Name, req.SectionID, req.Color)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -72,7 +72,7 @@ func (h *TaskStatusHandler) Update(c *gin.Context) {
 		return
 	}
 
-	ts, err := h.service.Update(c.Request.Context(), id, req.Name, req.Type)
+	ts, err := h.service.Update(c.Request.Context(), id, req.Name, req.SectionID, req.Color)
 	if err != nil {
 		if errors.Is(err, postgres.ErrTaskStatusNotFound) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "task status not found"})

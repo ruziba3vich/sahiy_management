@@ -557,6 +557,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/roles": {
+            "get": {
+                "description": "Retrieve a list of all available roles with their names and values",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "roles"
+                ],
+                "summary": "Get all roles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.RoleResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/schedules": {
             "get": {
                 "description": "Retrieve a list of all schedules",
@@ -1340,7 +1363,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new task status with the provided name and type",
+                "description": "Create a new task status with the provided name and section ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -1537,7 +1560,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a list of tasks with optional filters (user_id, section_id, status, priority, parent_id) and pagination",
+                "description": "Retrieve a list of tasks with optional filters (assignee_id, reviewer_id, section_id, status, priority, parent_id) and pagination",
                 "produces": [
                     "application/json"
                 ],
@@ -1548,8 +1571,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Filter by user ID",
-                        "name": "user_id",
+                        "description": "Filter by assignee user ID",
+                        "name": "assignee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Filter by reviewer user ID",
+                        "name": "reviewer_id",
                         "in": "query"
                     },
                     {
@@ -1610,7 +1639,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new task with the provided data",
+                "description": "Create a new task with the provided data. If reviewer_id is not provided, it defaults to the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -1645,6 +1674,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -1661,7 +1696,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve tasks assigned to the authenticated user with optional filters (section_id, status, priority, parent_id) and pagination",
+                "description": "Retrieve tasks where the authenticated user is the assignee with optional filters (section_id, status, priority, parent_id) and pagination",
                 "produces": [
                     "application/json"
                 ],
@@ -2473,12 +2508,15 @@ const docTemplate = `{
         "dto.CreateTaskRequest": {
             "type": "object",
             "required": [
-                "deadline",
                 "priority",
                 "section_id",
                 "title"
             ],
             "properties": {
+                "assignee_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "deadline": {
                     "type": "integer",
                     "example": 1737363600
@@ -2495,6 +2533,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "reviewer_id": {
+                    "type": "integer",
+                    "example": 2
+                },
                 "section_id": {
                     "type": "integer",
                     "example": 1
@@ -2506,10 +2548,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Implement login feature"
-                },
-                "user_id": {
-                    "type": "integer",
-                    "example": 1
                 }
             }
         },
@@ -2517,14 +2555,18 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "type"
+                "section_id"
             ],
             "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#ffffff"
+                },
                 "name": {
                     "type": "string",
                     "example": "In Progress"
                 },
-                "type": {
+                "section_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -2577,7 +2619,6 @@ const docTemplate = `{
                 "password",
                 "phone",
                 "role",
-                "schedule_id",
                 "section_id"
             ],
             "properties": {
@@ -2693,6 +2734,19 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.RoleResponse": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "example": "Super Admin"
+                },
+                "value": {
+                    "type": "integer",
+                    "example": 99
                 }
             }
         },
@@ -2815,9 +2869,21 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "status_color": {
+                    "type": "string",
+                    "example": "#ffffff"
+                },
+                "status_name": {
+                    "type": "string",
+                    "example": "In Progress"
+                },
                 "task_id": {
                     "type": "integer",
                     "example": 1
+                },
+                "user_full_name": {
+                    "type": "string",
+                    "example": "John Doe"
                 },
                 "user_id": {
                     "type": "integer",
@@ -2855,6 +2921,13 @@ const docTemplate = `{
         "dto.TaskResponse": {
             "type": "object",
             "properties": {
+                "assignee": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
+                "assignee_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "created_at": {
                     "type": "integer",
                     "example": 1737277200
@@ -2879,6 +2952,13 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "reviewer": {
+                    "$ref": "#/definitions/dto.UserResponse"
+                },
+                "reviewer_id": {
+                    "type": "integer",
+                    "example": 2
+                },
                 "section_id": {
                     "type": "integer",
                     "example": 1
@@ -2887,6 +2967,12 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "sub_tasks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TaskResponse"
+                    }
+                },
                 "title": {
                     "type": "string",
                     "example": "Implement login feature"
@@ -2894,16 +2980,16 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "integer",
                     "example": 1737277200
-                },
-                "user_id": {
-                    "type": "integer",
-                    "example": 1
                 }
             }
         },
         "dto.TaskStatusResponse": {
             "type": "object",
             "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#ffffff"
+                },
                 "id": {
                     "type": "integer",
                     "example": 1
@@ -2912,7 +2998,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "In Progress"
                 },
-                "type": {
+                "section_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -3042,13 +3128,16 @@ const docTemplate = `{
         "dto.UpdateTaskRequest": {
             "type": "object",
             "required": [
-                "deadline",
                 "priority",
                 "section_id",
                 "status",
                 "title"
             ],
             "properties": {
+                "assignee_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "deadline": {
                     "type": "integer",
                     "example": 1737363600
@@ -3065,6 +3154,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "reviewer_id": {
+                    "type": "integer",
+                    "example": 2
+                },
                 "section_id": {
                     "type": "integer",
                     "example": 1
@@ -3076,10 +3169,6 @@ const docTemplate = `{
                 "title": {
                     "type": "string",
                     "example": "Implement login feature"
-                },
-                "user_id": {
-                    "type": "integer",
-                    "example": 1
                 }
             }
         },
@@ -3087,14 +3176,18 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "type"
+                "section_id"
             ],
             "properties": {
+                "color": {
+                    "type": "string",
+                    "example": "#ffffff"
+                },
                 "name": {
                     "type": "string",
                     "example": "In Progress"
                 },
-                "type": {
+                "section_id": {
                     "type": "integer",
                     "example": 1
                 }
@@ -3144,9 +3237,9 @@ const docTemplate = `{
             "required": [
                 "department_id",
                 "full_name",
+                "joined_at",
                 "phone",
                 "role",
-                "schedule_id",
                 "section_id"
             ],
             "properties": {
@@ -3157,6 +3250,10 @@ const docTemplate = `{
                 "full_name": {
                     "type": "string",
                     "example": "John Doe"
+                },
+                "joined_at": {
+                    "type": "integer",
+                    "example": 1737277200
                 },
                 "phone": {
                     "type": "string",

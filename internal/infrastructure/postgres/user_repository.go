@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/jackc/pgx/v5"
@@ -26,10 +27,15 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) (*do
 		RETURNING id
 	`
 
+	var scheduleID sql.NullInt64
+	if user.ScheduleID != nil {
+		scheduleID = sql.NullInt64{Int64: *user.ScheduleID, Valid: true}
+	}
+
 	err := r.db.QueryRow(ctx, query,
 		user.DepartmentID,
 		user.SectionID,
-		user.ScheduleID,
+		scheduleID,
 		user.Role,
 		user.Phone,
 		user.FullName,
@@ -49,17 +55,23 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *domain.User) (*do
 func (r *UserRepository) UpdateUser(ctx context.Context, user *domain.User) (*domain.User, error) {
 	query := `
 		UPDATE users
-		SET department_id = $1, section_id = $2, schedule_id = $3, role = $4, phone = $5, full_name = $6, updated_at = $7, tg_chat_id = $8
-		WHERE id = $9
+		SET department_id = $1, section_id = $2, schedule_id = $3, role = $4, phone = $5, full_name = $6, joined_at = $7, updated_at = $8, tg_chat_id = $9
+		WHERE id = $10
 	`
+
+	var scheduleID sql.NullInt64
+	if user.ScheduleID != nil {
+		scheduleID = sql.NullInt64{Int64: *user.ScheduleID, Valid: true}
+	}
 
 	result, err := r.db.Exec(ctx, query,
 		user.DepartmentID,
 		user.SectionID,
-		user.ScheduleID,
+		scheduleID,
 		user.Role,
 		user.Phone,
 		user.FullName,
+		user.JoinedAt,
 		user.UpdatedAt,
 		user.TgChatID,
 		user.ID,
@@ -98,11 +110,12 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int64) (*domain.Use
 	`
 
 	user := &domain.User{}
+	var scheduleID sql.NullInt64
 	err := r.db.QueryRow(ctx, query, id).Scan(
 		&user.ID,
 		&user.DepartmentID,
 		&user.SectionID,
-		&user.ScheduleID,
+		&scheduleID,
 		&user.Role,
 		&user.Phone,
 		&user.FullName,
@@ -119,6 +132,10 @@ func (r *UserRepository) GetUserByID(ctx context.Context, id int64) (*domain.Use
 		return nil, err
 	}
 
+	if scheduleID.Valid {
+		user.ScheduleID = &scheduleID.Int64
+	}
+
 	return user, nil
 }
 
@@ -130,11 +147,12 @@ func (r *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*dom
 	`
 
 	user := &domain.User{}
+	var scheduleID sql.NullInt64
 	err := r.db.QueryRow(ctx, query, phone).Scan(
 		&user.ID,
 		&user.DepartmentID,
 		&user.SectionID,
-		&user.ScheduleID,
+		&scheduleID,
 		&user.Role,
 		&user.Phone,
 		&user.FullName,
@@ -149,6 +167,10 @@ func (r *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*dom
 			return nil, ErrUserNotFound
 		}
 		return nil, err
+	}
+
+	if scheduleID.Valid {
+		user.ScheduleID = &scheduleID.Int64
 	}
 
 	return user, nil
@@ -170,11 +192,12 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]*domain.User, error
 	var users []*domain.User
 	for rows.Next() {
 		user := &domain.User{}
+		var scheduleID sql.NullInt64
 		err := rows.Scan(
 			&user.ID,
 			&user.DepartmentID,
 			&user.SectionID,
-			&user.ScheduleID,
+			&scheduleID,
 			&user.Role,
 			&user.Phone,
 			&user.FullName,
@@ -186,6 +209,9 @@ func (r *UserRepository) GetAllUsers(ctx context.Context) ([]*domain.User, error
 		)
 		if err != nil {
 			return nil, err
+		}
+		if scheduleID.Valid {
+			user.ScheduleID = &scheduleID.Int64
 		}
 		users = append(users, user)
 	}

@@ -23,6 +23,7 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	taskHandler := handler.NewTaskHandler(svc.GetTask())
 	thHandler := handler.NewTaskHistoryHandler(svc.GetTaskHistory())
 	authHandler := handler.NewAuthHandler(svc.GetAuth())
+	roleHandler := handler.NewRoleHandler()
 
 	authService := svc.GetAuth()
 
@@ -66,6 +67,9 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	// Task Histories
 	registerCRUD(protected, "/task-histories", thHandler)
 	protected.GET("/task-histories/my", thHandler.GetMyHistory)
+
+	// Roles
+	protected.GET("/roles", roleHandler.GetAll)
 }
 
 type crudHandler interface {

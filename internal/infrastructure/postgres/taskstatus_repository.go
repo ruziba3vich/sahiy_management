@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/taskstatus"
 )
@@ -21,12 +22,12 @@ func NewTaskStatusRepository(db *pgxpool.Pool) domain.Repository {
 
 func (r *TaskStatusRepository) CreateTaskStatus(ctx context.Context, ts *domain.TaskStatus) (*domain.TaskStatus, error) {
 	query := `
-		INSERT INTO task_statuses (name, type)
-		VALUES ($1, $2)
+		INSERT INTO task_statuses (name, section_id, color)
+		VALUES ($1, $2, $3)
 		RETURNING id
 	`
 
-	err := r.db.QueryRow(ctx, query, ts.Name, ts.Type).Scan(&ts.ID)
+	err := r.db.QueryRow(ctx, query, ts.Name, ts.SectionID, ts.Color).Scan(&ts.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -37,11 +38,11 @@ func (r *TaskStatusRepository) CreateTaskStatus(ctx context.Context, ts *domain.
 func (r *TaskStatusRepository) UpdateTaskStatus(ctx context.Context, ts *domain.TaskStatus) (*domain.TaskStatus, error) {
 	query := `
 		UPDATE task_statuses
-		SET name = $1, type = $2
-		WHERE id = $3
+		SET name = $1, section_id = $2, color = $3
+		WHERE id = $4
 	`
 
-	result, err := r.db.Exec(ctx, query, ts.Name, ts.Type, ts.ID)
+	result, err := r.db.Exec(ctx, query, ts.Name, ts.SectionID, ts.Color, ts.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,26 +71,28 @@ func (r *TaskStatusRepository) DeleteTaskStatus(ctx context.Context, id int64) e
 
 func (r *TaskStatusRepository) GetTaskStatusByID(ctx context.Context, id int64) (*domain.TaskStatus, error) {
 	query := `
-		SELECT id, name, type
+		SELECT id, name, section_id, color
 		FROM task_statuses
 		WHERE id = $1
 	`
 
 	ts := &domain.TaskStatus{}
-	err := r.db.QueryRow(ctx, query, id).Scan(&ts.ID, &ts.Name, &ts.Type)
+	var color pgtype.Text
+	err := r.db.QueryRow(ctx, query, id).Scan(&ts.ID, &ts.Name, &ts.SectionID, &color)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrTaskStatusNotFound
 		}
 		return nil, err
 	}
+	ts.Color = color.String
 
 	return ts, nil
 }
 
 func (r *TaskStatusRepository) GetAllTaskStatuses(ctx context.Context) ([]*domain.TaskStatus, error) {
 	query := `
-		SELECT id, name, type
+		SELECT id, name, section_id, color
 		FROM task_statuses
 		ORDER BY id
 	`
@@ -103,10 +106,12 @@ func (r *TaskStatusRepository) GetAllTaskStatuses(ctx context.Context) ([]*domai
 	var statuses []*domain.TaskStatus
 	for rows.Next() {
 		ts := &domain.TaskStatus{}
-		err := rows.Scan(&ts.ID, &ts.Name, &ts.Type)
+		var color pgtype.Text
+		err := rows.Scan(&ts.ID, &ts.Name, &ts.SectionID, &color)
 		if err != nil {
 			return nil, err
 		}
+		ts.Color = color.String
 		statuses = append(statuses, ts)
 	}
 
