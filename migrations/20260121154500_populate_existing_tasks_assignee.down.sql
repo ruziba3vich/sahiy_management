@@ -1,0 +1,3 @@
+-- Rollback: Clear assignee_id values that were set by the up migration
+-- This is optional - you may want to keep the data
+-- UPDATE tasks SET assignee_id = NULL WHERE assignee_id IS NOT NULL;

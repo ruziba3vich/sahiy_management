@@ -1,0 +1,1 @@
+ALTER TABLE "task_statuses" ADD COLUMN IF NOT EXISTS "color" VARCHAR(64);

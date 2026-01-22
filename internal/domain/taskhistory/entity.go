@@ -7,12 +7,15 @@ import (
 )
 
 type TaskHistory struct {
-	ID         int64
-	TaskID     int64
-	UserID     int64
-	Status     int
-	StartedAt  int64
-	FinishedAt pgtype.Int8
+	ID           int64
+	TaskID       int64
+	UserID       int64
+	Status       int
+	StartedAt    int64
+	FinishedAt   pgtype.Int8
+	UserFullName string
+	StatusName   string
+	Color        string
 }
 
 func NewTaskHistory(taskID, userID int64, status int) *TaskHistory {

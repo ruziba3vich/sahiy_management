@@ -1,19 +1,22 @@
 package taskstatus
 
 type TaskStatus struct {
-	ID   int64
-	Name string
-	Type int
+	ID        int64
+	Name      string
+	SectionID int64
+	Color     string
 }
 
-func NewTaskStatus(name string, statusType int) *TaskStatus {
+func NewTaskStatus(name string, sectionID int64, color string) *TaskStatus {
 	return &TaskStatus{
-		Name: name,
-		Type: statusType,
+		Name:      name,
+		SectionID: sectionID,
+		Color:     color,
 	}
 }
 
-func (t *TaskStatus) Update(name string, statusType int) {
+func (t *TaskStatus) Update(name string, sectionID int64, color string) {
 	t.Name = name
-	t.Type = statusType
+	t.SectionID = sectionID
+	t.Color = color
 }
