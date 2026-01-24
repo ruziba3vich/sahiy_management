@@ -1,0 +1,1 @@
+ALTER TABLE "department_branches" ADD CONSTRAINT "unique_branch_department" UNIQUE ("branch_id", "department_id");

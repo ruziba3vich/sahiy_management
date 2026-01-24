@@ -5,11 +5,16 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/department"
 )
 
-var ErrDepartmentNotFound = errors.New("department not found")
+var (
+	ErrDepartmentNotFound        = errors.New("Department not found")
+	ErrDepartmentBranchNotFound  = errors.New("Department branch not found")
+	ErrDuplicateDepartmentBranch = errors.New("Branch already attached to this department")
+)
 
 type DepartmentRepository struct {
 	db *pgxpool.Pool
@@ -137,4 +142,80 @@ func (r *DepartmentRepository) GetAllDepartments(ctx context.Context) ([]*domain
 	}
 
 	return departments, nil
+}
+
+func (r *DepartmentRepository) AttachBranch(ctx context.Context, db *domain.DepartmentBranch) (*domain.DepartmentBranch, error) {
+	query := `
+		INSERT INTO department_branches (branch_id, department_id, status, created_at)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id
+	`
+
+	err := r.db.QueryRow(ctx, query,
+		db.BranchID,
+		db.DepartmentID,
+		db.Status,
+		db.CreatedAt,
+	).Scan(&db.ID)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, ErrDuplicateDepartmentBranch
+		}
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func (r *DepartmentRepository) UpdateDepartmentBranchStatus(ctx context.Context, id int64, status int) error {
+	query := `UPDATE department_branches SET status = $1 WHERE id = $2`
+
+	result, err := r.db.Exec(ctx, query, status, id)
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrDepartmentBranchNotFound
+	}
+
+	return nil
+}
+
+func (r *DepartmentRepository) GetBranchesByDepartmentID(ctx context.Context, departmentID int64) ([]*domain.DepartmentBranch, error) {
+	query := `
+		SELECT id, branch_id, department_id, status, created_at
+		FROM department_branches
+		WHERE department_id = $1
+		ORDER BY id
+	`
+
+	rows, err := r.db.Query(ctx, query, departmentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var branches []*domain.DepartmentBranch
+	for rows.Next() {
+		db := &domain.DepartmentBranch{}
+		err := rows.Scan(
+			&db.ID,
+			&db.BranchID,
+			&db.DepartmentID,
+			&db.Status,
+			&db.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		branches = append(branches, db)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return branches, nil
 }

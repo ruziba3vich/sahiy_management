@@ -14,16 +14,17 @@ import (
 func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	// Handlers
 	deptHandler := handler.NewDepartmentHandler(svc.GetDepartment())
-	secHandler := handler.NewSectionHandler(svc.GetSection())
-	branchHandler := handler.NewBranchHandler(svc.GetBranch())
 	scheduleHandler := handler.NewScheduleHandler(svc.GetSchedule())
 	userHandler := handler.NewUserHandler(svc.GetUser())
 	userActionHandler := handler.NewUserActionHandler(svc.GetUserAction())
 	tsHandler := handler.NewTaskStatusHandler(svc.GetTaskStatus())
 	taskHandler := handler.NewTaskHandler(svc.GetTask())
 	thHandler := handler.NewTaskHistoryHandler(svc.GetTaskHistory())
+	branchHandler := handler.NewBranchHandler(svc.GetBranch())
+	sectionHandler := handler.NewSectionHandler(svc.GetSection())
 	authHandler := handler.NewAuthHandler(svc.GetAuth())
 	roleHandler := handler.NewRoleHandler()
+	statsHandler := handler.NewStatisticsHandler(svc.GetStatistics())
 
 	authService := svc.GetAuth()
 
@@ -40,13 +41,13 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	protected.Use(middleware.AuthMiddleware(authService))
 
 	// Departments
-	registerCRUD(protected, "/departments", deptHandler)
-
-	// Sections
-	registerCRUD(protected, "/sections", secHandler)
+	deptHandler.RegisterRoutes(protected)
 
 	// Branches
-	registerCRUD(protected, "/branches", branchHandler)
+	branchHandler.RegisterRoutes(protected)
+
+	// Sections
+	sectionHandler.RegisterRoutes(protected)
 
 	// Schedules
 	registerCRUD(protected, "/schedules", scheduleHandler)
@@ -55,14 +56,17 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 	registerCRUD(protected, "/users", userHandler)
 
 	// User Actions
-	registerCRUD(protected, "/user-actions", userActionHandler)
+	userActionHandler.RegisterRoutes(protected)
 
 	// Task Statuses
 	registerCRUD(protected, "/task-statuses", tsHandler)
+	protected.GET("/task-statuses/types", tsHandler.GetTypes)
 
 	// Tasks
 	registerCRUD(protected, "/tasks", taskHandler)
 	protected.GET("/tasks/my", taskHandler.GetMyTasks)
+	protected.GET("/tasks/calendar", taskHandler.GetCalendarEvents)
+	protected.GET("/tasks/calendar/:id", taskHandler.GetCalendarEventByID)
 
 	// Task Histories
 	registerCRUD(protected, "/task-histories", thHandler)
@@ -70,6 +74,9 @@ func SetupRoutes(r *gin.Engine, svc *application.Service) {
 
 	// Roles
 	protected.GET("/roles", roleHandler.GetAll)
+
+	// Statistics
+	statsHandler.RegisterRoutes(protected)
 }
 
 type crudHandler interface {

@@ -41,3 +41,38 @@ func ToDepartmentResponseList(depts []*domain.Department) []*DepartmentResponse 
 	}
 	return responses
 }
+
+type AttachBranchRequest struct {
+	BranchID     int64 `json:"branch_id" binding:"required" example:"1"`
+	DepartmentID int64 `json:"department_id" binding:"required" example:"1"`
+}
+
+type UpdateDepartmentBranchStatusRequest struct {
+	Status *int `json:"status" binding:"required" example:"1"`
+}
+
+type DepartmentBranchResponse struct {
+	ID           int64 `json:"id" example:"1"`
+	BranchID     int64 `json:"branch_id" example:"1"`
+	DepartmentID int64 `json:"department_id" example:"1"`
+	Status       int   `json:"status" example:"1"`
+	CreatedAt    int64 `json:"created_at" example:"1737277200"`
+}
+
+func ToDepartmentBranchResponse(db *domain.DepartmentBranch) *DepartmentBranchResponse {
+	return &DepartmentBranchResponse{
+		ID:           db.ID,
+		BranchID:     db.BranchID,
+		DepartmentID: db.DepartmentID,
+		Status:       db.Status,
+		CreatedAt:    db.CreatedAt,
+	}
+}
+
+func ToDepartmentBranchResponseList(branches []*domain.DepartmentBranch) []*DepartmentBranchResponse {
+	responses := make([]*DepartmentBranchResponse, len(branches))
+	for i, db := range branches {
+		responses[i] = ToDepartmentBranchResponse(db)
+	}
+	return responses
+}

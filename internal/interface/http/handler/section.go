@@ -29,7 +29,7 @@ func NewSectionHandler(service *appSec.Service) *SectionHandler {
 // @Success      201      {object}  dto.SectionResponse
 // @Failure      400      {object}  dto.ErrorResponse
 // @Failure      500      {object}  dto.ErrorResponse
-// @Router       /sections [post]
+// @Router       /sections [post] [deprecated]
 func (h *SectionHandler) Create(c *gin.Context) {
 	var req dto.CreateSectionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -58,7 +58,7 @@ func (h *SectionHandler) Create(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse
 // @Failure      404      {object}  dto.ErrorResponse
 // @Failure      500      {object}  dto.ErrorResponse
-// @Router       /sections/{id} [put]
+// @Router       /sections/{id} [put] [deprecated]
 func (h *SectionHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -95,7 +95,7 @@ func (h *SectionHandler) Update(c *gin.Context) {
 // @Failure      400  {object}  dto.ErrorResponse
 // @Failure      404  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /sections/{id} [delete]
+// @Router       /sections/{id} [delete] [deprecated]
 func (h *SectionHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -126,7 +126,7 @@ func (h *SectionHandler) Delete(c *gin.Context) {
 // @Failure      400  {object}  dto.ErrorResponse
 // @Failure      404  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /sections/{id} [get]
+// @Router       /sections/{id} [get] [deprecated]
 func (h *SectionHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -154,7 +154,7 @@ func (h *SectionHandler) GetByID(c *gin.Context) {
 // @Produce      json
 // @Success      200  {array}   dto.SectionResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /sections [get]
+// @Router       /sections [get] [deprecated]
 func (h *SectionHandler) GetAll(c *gin.Context) {
 	sections, err := h.service.GetAll(c.Request.Context())
 	if err != nil {

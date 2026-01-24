@@ -25,4 +25,6 @@ type Repository interface {
 	GetTaskByID(ctx context.Context, id int64) (*Task, error)
 	GetAllTasks(ctx context.Context) ([]*Task, error)
 	GetTasksWithFilter(ctx context.Context, filter *TaskFilter) (*TaskListResult, error)
+	GetTasksForCalendar(ctx context.Context, sectionID, assigneeID *int64, startDate, endDate string, status *int) ([]*Task, error)
+	GetEndDateForTask(ctx context.Context, taskID int64) (*int64, error)
 }

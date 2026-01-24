@@ -6,6 +6,7 @@ import (
 	"github.com/ruziba3vich/sahiy_management/internal/application/department"
 	"github.com/ruziba3vich/sahiy_management/internal/application/schedule"
 	"github.com/ruziba3vich/sahiy_management/internal/application/section"
+	"github.com/ruziba3vich/sahiy_management/internal/application/statistics"
 	"github.com/ruziba3vich/sahiy_management/internal/application/task"
 	"github.com/ruziba3vich/sahiy_management/internal/application/taskhistory"
 	"github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
@@ -25,6 +26,7 @@ type Service struct {
 	taskStatus  *taskstatus.Service
 	task        *task.Service
 	taskHistory *taskhistory.Service
+	statistics  *statistics.Service
 	auth        auth.Service
 }
 
@@ -35,10 +37,11 @@ func New(repo *infrastructure.Repository, cfg *config.Config) *Service {
 		branch:      branch.NewService(repo.GetBranch()),
 		schedule:    schedule.NewService(repo.GetSchedule()),
 		user:        user.NewService(repo.GetUser()),
-		userAction:  useraction.NewService(repo.GetUserAction()),
+		userAction:  useraction.NewService(repo.GetUserAction(), repo.GetBranch()),
 		taskStatus:  taskstatus.NewService(repo.GetTaskStatus()),
-		task:        task.NewService(repo.GetTask()),
+		task:        task.NewService(repo.GetTask(), repo.GetUser(), repo.GetTaskStatus(), repo.GetSection(), repo.GetTaskHistory()),
 		taskHistory: taskhistory.NewService(repo.GetTaskHistory()),
+		statistics:  statistics.NewService(repo.GetStatistics()),
 		auth: *auth.NewService(
 			repo.GetUser(),
 			cfg.JWTSecret,
@@ -85,4 +88,8 @@ func (r *Service) GetTask() *task.Service {
 
 func (r *Service) GetAuth() *auth.Service {
 	return &r.auth
+}
+
+func (r *Service) GetStatistics() *statistics.Service {
+	return r.statistics
 }
