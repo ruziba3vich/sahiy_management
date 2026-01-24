@@ -2,7 +2,9 @@ package department
 
 import (
 	"context"
+	"time"
 
+	global "github.com/ruziba3vich/sahiy_management/internal/domain"
 	domain "github.com/ruziba3vich/sahiy_management/internal/domain/department"
 )
 
@@ -39,4 +41,22 @@ func (s *Service) GetByID(ctx context.Context, id int64) (*domain.Department, er
 
 func (s *Service) GetAll(ctx context.Context) ([]*domain.Department, error) {
 	return s.repo.GetAllDepartments(ctx)
+}
+
+func (s *Service) AttachBranch(ctx context.Context, branchID, departmentID int64) (*domain.DepartmentBranch, error) {
+	db := &domain.DepartmentBranch{
+		BranchID:     branchID,
+		DepartmentID: departmentID,
+		Status:       global.StatusActive,
+		CreatedAt:    time.Now().Unix(),
+	}
+	return s.repo.AttachBranch(ctx, db)
+}
+
+func (s *Service) UpdateDepartmentBranchStatus(ctx context.Context, id int64, status int) error {
+	return s.repo.UpdateDepartmentBranchStatus(ctx, id, status)
+}
+
+func (s *Service) GetBranchesByDepartmentID(ctx context.Context, departmentID int64) ([]*domain.DepartmentBranch, error) {
+	return s.repo.GetBranchesByDepartmentID(ctx, departmentID)
 }

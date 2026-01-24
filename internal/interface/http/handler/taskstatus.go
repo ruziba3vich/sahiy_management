@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	appTS "github.com/ruziba3vich/sahiy_management/internal/application/taskstatus"
+	"github.com/ruziba3vich/sahiy_management/internal/domain/taskstatus"
 	"github.com/ruziba3vich/sahiy_management/internal/infrastructure/postgres"
 	"github.com/ruziba3vich/sahiy_management/internal/interface/http/dto"
 )
@@ -17,6 +18,17 @@ type TaskStatusHandler struct {
 
 func NewTaskStatusHandler(service *appTS.Service) *TaskStatusHandler {
 	return &TaskStatusHandler{service: service}
+}
+
+// GetTypes godoc
+// @Summary      Get all task status types
+// @Description  Retrieve a list of all available task status types with their names and values
+// @Tags         task-statuses
+// @Produce      json
+// @Success      200  {array}   taskstatus.Type
+// @Router       /task-statuses/types [get]
+func (h *TaskStatusHandler) GetTypes(c *gin.Context) {
+	c.JSON(http.StatusOK, taskstatus.GetAllTypes())
 }
 
 // Create godoc
@@ -37,7 +49,7 @@ func (h *TaskStatusHandler) Create(c *gin.Context) {
 		return
 	}
 
-	ts, err := h.service.Create(c.Request.Context(), req.Name, req.SectionID, req.Color)
+	ts, err := h.service.Create(c.Request.Context(), req.Name, req.SectionID, req.Color, int64(req.Type), req.Sort)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
 		return
@@ -72,7 +84,7 @@ func (h *TaskStatusHandler) Update(c *gin.Context) {
 		return
 	}
 
-	ts, err := h.service.Update(c.Request.Context(), id, req.Name, req.SectionID, req.Color)
+	ts, err := h.service.Update(c.Request.Context(), id, req.Name, req.SectionID, req.Color, int64(req.Type), req.Sort)
 	if err != nil {
 		if errors.Is(err, postgres.ErrTaskStatusNotFound) {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "task status not found"})
@@ -173,5 +185,6 @@ func (h *TaskStatusHandler) RegisterRoutes(r *gin.RouterGroup) {
 		taskStatuses.DELETE("/:id", h.Delete)
 		taskStatuses.GET("/:id", h.GetByID)
 		taskStatuses.GET("", h.GetAll)
+		taskStatuses.GET("/types", h.GetTypes)
 	}
 }

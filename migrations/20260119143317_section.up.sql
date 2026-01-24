@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS "sections" (
     "id"            SERIAL PRIMARY KEY,
-    "department_id" INT REFERENCES "departments"("id"),
+    "department_id" INT REFERENCES "departments"("id") ON DELETE CASCADE,
     "name"          VARCHAR(256),
     "created_at"    BIGINT,
     "updated_at"    BIGINT

@@ -1,6 +1,10 @@
 package dto
 
-import domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
+import (
+	"github.com/ruziba3vich/sahiy_management/internal/domain/section"
+	domain "github.com/ruziba3vich/sahiy_management/internal/domain/task"
+	"github.com/ruziba3vich/sahiy_management/internal/domain/taskstatus"
+)
 
 type CreateTaskRequest struct {
 	ParentID    *int64 `json:"parent_id" example:"1"`
@@ -52,6 +56,23 @@ type TaskListResponse struct {
 	TotalPages int             `json:"total_pages" example:"5"`
 }
 
+type CalendarEventResponse struct {
+	ID           int64  `json:"id" example:"1"`
+	Title        string `json:"title" example:"Backend API yaratish"`
+	Description  string `json:"description" example:"REST API endpoints yaratish"`
+	AssigneeID   *int64 `json:"assignee_id" example:"5"`
+	AssigneeName string `json:"assignee_name" example:"Botir Nematilloyev"`
+	Status       int    `json:"status" example:"2"`
+	StatusName   string `json:"status_name" example:"Jarayonda"`
+	StatusColor  string `json:"status_color" example:"#f59e0b"`
+	StartDate    int64  `json:"start_date" example:"1704067200"`
+	EndDate      *int64 `json:"end_date" example:"1704153600"`
+	Deadline     *int64 `json:"deadline" example:"1704326400"`
+	Priority     int    `json:"priority" example:"3"`
+	SectionID    int64  `json:"section_id" example:"1"`
+	SectionName  string `json:"section_name" example:"IT"`
+}
+
 func ToTaskResponse(task *domain.Task) *TaskResponse {
 	resp := &TaskResponse{
 		ID:          task.ID,
@@ -88,6 +109,52 @@ func ToTaskResponseList(tasks []*domain.Task) []*TaskResponse {
 	responses := make([]*TaskResponse, len(tasks))
 	for i, task := range tasks {
 		responses[i] = ToTaskResponse(task)
+	}
+	return responses
+}
+
+func ToCalendarEventResponse(task *domain.Task, status *taskstatus.TaskStatus, sec *section.Section) *CalendarEventResponse {
+	resp := &CalendarEventResponse{
+		ID:          task.ID,
+		Title:       task.Title,
+		Description: task.Description,
+		Status:      task.Status,
+		StartDate:   task.CreatedAt, // Assuming CreatedAt as start_date if no specific field
+		Priority:    task.Priority,
+		SectionID:   task.SectionID,
+	}
+
+	if task.AssigneeID.Valid {
+		resp.AssigneeID = &task.AssigneeID.Int64
+	}
+	if task.Assignee != nil {
+		resp.AssigneeName = task.Assignee.FullName
+	}
+	if status != nil {
+		resp.StatusName = status.Name
+		resp.StatusColor = status.Color
+	}
+	if sec != nil {
+		resp.SectionName = sec.Name
+	}
+	if task.Deadline.Valid {
+		resp.Deadline = &task.Deadline.Int64
+	}
+
+	// For end_date, if it's finished, we use the value from task.EndDate which was populated from task_histories
+	if task.EndDate != nil {
+		resp.EndDate = task.EndDate
+	} else if status != nil && status.StatusType == taskstatus.Finished {
+		resp.EndDate = &task.UpdatedAt
+	}
+
+	return resp
+}
+
+func ToCalendarEventResponseList(tasks []*domain.Task, statuses map[int64]*taskstatus.TaskStatus, sections map[int64]*section.Section) []*CalendarEventResponse {
+	responses := make([]*CalendarEventResponse, len(tasks))
+	for i, task := range tasks {
+		responses[i] = ToCalendarEventResponse(task, statuses[int64(task.Status)], sections[task.SectionID])
 	}
 	return responses
 }

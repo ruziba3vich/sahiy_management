@@ -2,9 +2,9 @@
 
 CREATE TABLE IF NOT EXISTS "user_actions" (
     "id"                SERIAL PRIMARY KEY,
-    "user_id"           INT REFERENCES "users"("id"),
-    "visit_branch_id"   INTEGER NOT NULL REFERENCES "branchs"("id"),
-    "leave_branch_id"   INTEGER REFERENCES "branchs"("id"),
+    "user_id"           INT REFERENCES "users"("id") ON DELETE CASCADE,
+    "visit_branch_id"   INTEGER NOT NULL REFERENCES "branchs"("id") ON DELETE CASCADE,
+    "leave_branch_id"   INTEGER REFERENCES "branchs"("id") ON DELETE CASCADE,
     "come_status"       SMALLINT,
     "out_status"        SMALLINT,
     "started_at"        BIGINT,

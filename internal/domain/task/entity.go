@@ -22,6 +22,7 @@ type Task struct {
 	Status      int
 	CreatedAt   int64
 	UpdatedAt   int64
+	EndDate     *int64
 }
 
 func NewTask(parentID pgtype.Int8, sectionID int64, assigneeID, reviewerID pgtype.Int8, title, description string, priority int, deadline pgtype.Int8, status int) *Task {

@@ -6,12 +6,16 @@ type CreateTaskStatusRequest struct {
 	Name      string `json:"name" binding:"required" example:"In Progress"`
 	SectionID int64  `json:"section_id" binding:"required" example:"1"`
 	Color     string `json:"color" example:"#ffffff"`
+	Type      int    `json:"type" example:"1"`
+	Sort      int    `json:"sort" example:"0"`
 }
 
 type UpdateTaskStatusRequest struct {
 	Name      string `json:"name" binding:"required" example:"In Progress"`
 	SectionID int64  `json:"section_id" binding:"required" example:"1"`
 	Color     string `json:"color" example:"#ffffff"`
+	Type      int    `json:"type" example:"1"`
+	Sort      int    `json:"sort" example:"0"`
 }
 
 type TaskStatusResponse struct {
@@ -19,6 +23,8 @@ type TaskStatusResponse struct {
 	Name      string `json:"name" example:"In Progress"`
 	SectionID int64  `json:"section_id" example:"1"`
 	Color     string `json:"color" example:"#ffffff"`
+	Type      int    `json:"type" example:"1"`
+	Sort      int    `json:"sort" example:"0"`
 }
 
 func ToTaskStatusResponse(ts *domain.TaskStatus) *TaskStatusResponse {
@@ -27,6 +33,8 @@ func ToTaskStatusResponse(ts *domain.TaskStatus) *TaskStatusResponse {
 		Name:      ts.Name,
 		SectionID: ts.SectionID,
 		Color:     ts.Color,
+		Type:      int(ts.StatusType),
+		Sort:      ts.Sort,
 	}
 }
 

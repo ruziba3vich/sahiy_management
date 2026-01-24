@@ -15,8 +15,6 @@ type DepartmentHandler struct {
 	service *appDept.Service
 }
 
-
-
 func NewDepartmentHandler(service *appDept.Service) *DepartmentHandler {
 	return &DepartmentHandler{service: service}
 }
@@ -172,9 +170,109 @@ func (h *DepartmentHandler) GetAll(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.ToDepartmentResponseList(depts))
 }
 
+// AttachBranch godoc
+// @Summary      Attach a branch to a department
+// @Description  Create a link between a branch and a department
+// @Tags         departments
+// @Accept       json
+// @Produce      json
+// @Param        request  body      dto.AttachBranchRequest  true  "Attachment data"
+// @Success      201      {object}  dto.DepartmentBranchResponse
+// @Failure      400      {object}  dto.ErrorResponse
+// @Failure      500      {object}  dto.ErrorResponse
+// @Router       /departments/branches [post]
+func (h *DepartmentHandler) AttachBranch(c *gin.Context) {
+	var req dto.AttachBranchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	db, err := h.service.AttachBranch(c.Request.Context(), req.BranchID, req.DepartmentID)
+	if err != nil {
+		if errors.Is(err, postgres.ErrDuplicateDepartmentBranch) {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, dto.ToDepartmentBranchResponse(db))
+}
+
+// UpdateDepartmentBranchStatus godoc
+// @Summary      Update department branch status
+// @Description  Update the status of a branch-department link
+// @Tags         departments
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                                       true  "Branch-Department Link ID"
+// @Param        request  body      dto.UpdateDepartmentBranchStatusRequest  true  "Status data"
+// @Success      200      {object}  map[string]string
+// @Failure      400      {object}  dto.ErrorResponse
+// @Failure      404      {object}  dto.ErrorResponse
+// @Failure      500      {object}  dto.ErrorResponse
+// @Router       /departments/branches/{id}/status [put]
+func (h *DepartmentHandler) UpdateDepartmentBranchStatus(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid link ID"})
+		return
+	}
+
+	var req dto.UpdateDepartmentBranchStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	err = h.service.UpdateDepartmentBranchStatus(c.Request.Context(), id, *req.Status)
+	if err != nil {
+		if errors.Is(err, postgres.ErrDepartmentBranchNotFound) {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "department branch link not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "status updated successfully"})
+}
+
+// GetBranchesByDepartmentID godoc
+// @Summary      Get branches for a department
+// @Description  Retrieve all branch links for a given department
+// @Tags         departments
+// @Produce      json
+// @Param        id   path      int  true  "Department ID"
+// @Success      200  {array}   dto.DepartmentBranchResponse
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /departments/{id}/branches [get]
+func (h *DepartmentHandler) GetBranchesByDepartmentID(c *gin.Context) {
+	departmentID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid department ID"})
+		return
+	}
+
+	branches, err := h.service.GetBranchesByDepartmentID(c.Request.Context(), departmentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.ToDepartmentBranchResponseList(branches))
+}
+
 func (h *DepartmentHandler) RegisterRoutes(r *gin.RouterGroup) {
 	departments := r.Group("/departments")
 	{
+		departments.POST("/branches", h.AttachBranch)
+		departments.PUT("/branches/:id/status", h.UpdateDepartmentBranchStatus)
+		departments.GET("/:id/branches", h.GetBranchesByDepartmentID)
+
 		departments.POST("", h.Create)
 		departments.PUT("/:id", h.Update)
 		departments.DELETE("/:id", h.Delete)
