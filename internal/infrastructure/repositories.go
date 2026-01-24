@@ -6,6 +6,7 @@ import (
 	"github.com/ruziba3vich/sahiy_management/internal/domain/department"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/schedule"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/section"
+	"github.com/ruziba3vich/sahiy_management/internal/domain/statistics"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/task"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/taskhistory"
 	"github.com/ruziba3vich/sahiy_management/internal/domain/taskstatus"
@@ -24,6 +25,7 @@ type Repository struct {
 	taskStatus  taskstatus.Repository
 	taskHistory taskhistory.Repository
 	tasks       task.Repository
+	statistics  statistics.Repository
 }
 
 func New(db *pgxpool.Pool) *Repository {
@@ -37,6 +39,7 @@ func New(db *pgxpool.Pool) *Repository {
 		taskStatus:  postgres.NewTaskStatusRepository(db),
 		tasks:       postgres.NewTaskRepository(db),
 		taskHistory: postgres.NewTaskHistoryRepository(db),
+		statistics:  postgres.NewStatisticsRepository(db),
 	}
 }
 
@@ -74,4 +77,8 @@ func (r *Repository) GetTaskHistory() taskhistory.Repository {
 
 func (r *Repository) GetTask() task.Repository {
 	return r.tasks
+}
+
+func (r *Repository) GetStatistics() statistics.Repository {
+	return r.statistics
 }

@@ -106,6 +106,8 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		return
 	}
 
+	currentUserID := c.MustGet("userID").(int64)
+
 	task, err := h.service.Update(
 		c.Request.Context(),
 		id,
@@ -118,6 +120,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		req.Priority,
 		req.Deadline,
 		req.Status,
+		currentUserID,
 	)
 	if err != nil {
 		if errors.Is(err, postgres.ErrTaskNotFound) {
@@ -191,6 +194,87 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.ToTaskResponse(task))
+}
+
+// GetCalendarEvents godoc
+// @Summary      Get tasks for calendar
+// @Description  Retrieve a list of tasks formatted for calendar view with date filtering
+// @Tags         tasks
+// @Produce      json
+// @Param        section_id   query     int     false  "Section ID"
+// @Param        assignee_id  query     int     false  "Assignee ID"
+// @Param        start_date   query     string  false  "Start date (YYYY-MM-DD)"
+// @Param        end_date     query     string  false  "End date (YYYY-MM-DD)"
+// @Param        status       query     int     false  "Status ID"
+// @Success      200          {object}  map[string]interface{}
+// @Failure      400          {object}  dto.ErrorResponse
+// @Failure      500          {object}  dto.ErrorResponse
+// @Router       /tasks/calendar [get]
+func (h *TaskHandler) GetCalendarEvents(c *gin.Context) {
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+
+	var sectionID *int64
+	if sid := c.Query("section_id"); sid != "" {
+		id, _ := strconv.ParseInt(sid, 10, 64)
+		sectionID = &id
+	}
+
+	var assigneeID *int64
+	if aid := c.Query("assignee_id"); aid != "" {
+		id, _ := strconv.ParseInt(aid, 10, 64)
+		assigneeID = &id
+	}
+
+	var status *int
+	if st := c.Query("status"); st != "" {
+		id, _ := strconv.Atoi(st)
+		status = &id
+	}
+
+	tasks, statusMap, sectionMap, err := h.service.GetTasksForCalendar(c.Request.Context(), sectionID, assigneeID, startDate, endDate, status)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    dto.ToCalendarEventResponseList(tasks, statusMap, sectionMap),
+	})
+}
+
+// GetCalendarEventByID godoc
+// @Summary      Get a single task for calendar
+// @Description  Retrieve a single task formatted for calendar view by ID
+// @Tags         tasks
+// @Produce      json
+// @Param        id   path      int  true  "Task ID"
+// @Success      200  {object}  map[string]interface{}
+// @Failure      404  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+// @Router       /tasks/calendar/{id} [get]
+func (h *TaskHandler) GetCalendarEventByID(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid task ID"})
+		return
+	}
+
+	task, status, sec, err := h.service.GetCalendarEventByID(c.Request.Context(), id)
+	if err != nil {
+		if errors.Is(err, postgres.ErrTaskNotFound) {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{Error: "task not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data":    dto.ToCalendarEventResponse(task, status, sec),
+	})
 }
 
 // GetAll godoc
@@ -362,6 +446,8 @@ func (h *TaskHandler) RegisterRoutes(r *gin.RouterGroup) {
 		tasks.POST("", h.Create)
 		tasks.PUT("/:id", h.Update)
 		tasks.DELETE("/:id", h.Delete)
+		tasks.GET("/calendar", h.GetCalendarEvents)
+		tasks.GET("/calendar/:id", h.GetCalendarEventByID)
 		tasks.GET("/:id", h.GetByID)
 		tasks.GET("", h.GetAll)
 	}

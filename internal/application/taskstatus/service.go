@@ -14,18 +14,18 @@ func NewService(repo domain.Repository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Create(ctx context.Context, name string, sectionID int64, color string) (*domain.TaskStatus, error) {
-	ts := domain.NewTaskStatus(name, sectionID, color)
+func (s *Service) Create(ctx context.Context, name string, sectionID int64, color string, status_type int64, sort int) (*domain.TaskStatus, error) {
+	ts := domain.NewTaskStatus(name, sectionID, color, status_type, sort)
 	return s.repo.CreateTaskStatus(ctx, ts)
 }
 
-func (s *Service) Update(ctx context.Context, id int64, name string, sectionID int64, color string) (*domain.TaskStatus, error) {
+func (s *Service) Update(ctx context.Context, id int64, name string, sectionID int64, color string, status_type int64, sort int) (*domain.TaskStatus, error) {
 	ts, err := s.repo.GetTaskStatusByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	ts.Update(name, sectionID, color)
+	ts.Update(name, sectionID, color, status_type, sort)
 	return s.repo.UpdateTaskStatus(ctx, ts)
 }
 

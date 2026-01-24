@@ -29,7 +29,7 @@ func NewBranchHandler(service *appBranch.Service) *BranchHandler {
 // @Success      201      {object}  dto.BranchResponse
 // @Failure      400      {object}  dto.ErrorResponse
 // @Failure      500      {object}  dto.ErrorResponse
-// @Router       /branches [post]
+// @Router       /branches [post] [deprecated]
 func (h *BranchHandler) Create(c *gin.Context) {
 	var req dto.CreateBranchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,7 +63,7 @@ func (h *BranchHandler) Create(c *gin.Context) {
 // @Failure      400      {object}  dto.ErrorResponse
 // @Failure      404      {object}  dto.ErrorResponse
 // @Failure      500      {object}  dto.ErrorResponse
-// @Router       /branches/{id} [put]
+// @Router       /branches/{id} [put] [deprecated]
 func (h *BranchHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -100,7 +100,7 @@ func (h *BranchHandler) Update(c *gin.Context) {
 // @Failure      400  {object}  dto.ErrorResponse
 // @Failure      404  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /branches/{id} [delete]
+// @Router       /branches/{id} [delete] [deprecated]
 func (h *BranchHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -131,7 +131,7 @@ func (h *BranchHandler) Delete(c *gin.Context) {
 // @Failure      400  {object}  dto.ErrorResponse
 // @Failure      404  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /branches/{id} [get]
+// @Router       /branches/{id} [get] [deprecated]
 func (h *BranchHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -159,7 +159,7 @@ func (h *BranchHandler) GetByID(c *gin.Context) {
 // @Produce      json
 // @Success      200  {array}   dto.BranchResponse
 // @Failure      500  {object}  dto.ErrorResponse
-// @Router       /branches [get]
+// @Router       /branches [get] [deprecated]
 func (h *BranchHandler) GetAll(c *gin.Context) {
 	branches, err := h.service.GetAll(c.Request.Context())
 	if err != nil {

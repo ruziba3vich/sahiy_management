@@ -405,6 +405,114 @@
                 }
             }
         },
+        "/departments/branches": {
+            "post": {
+                "description": "Create a link between a branch and a department",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Attach a branch to a department",
+                "parameters": [
+                    {
+                        "description": "Attachment data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AttachBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DepartmentBranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/departments/branches/{id}/status": {
+            "put": {
+                "description": "Update the status of a branch-department link",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Update department branch status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch-Department Link ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateDepartmentBranchStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/departments/{id}": {
             "get": {
                 "description": "Retrieve a single department by its ID",
@@ -538,6 +646,50 @@
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/departments/{id}/branches": {
+            "get": {
+                "description": "Retrieve all branch links for a given department",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Get branches for a department",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Department ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.DepartmentBranchResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1012,6 +1164,32 @@
                 }
             }
         },
+        "/statistics/dashboard": {
+            "get": {
+                "description": "Retrieve total employees, department stats, total attendance, and task stats for the current month",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "statistics"
+                ],
+                "summary": "Get dashboard statistics",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/statistics.DashboardStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/task-histories": {
             "get": {
                 "security": [
@@ -1401,6 +1579,29 @@
                 }
             }
         },
+        "/task-statuses/types": {
+            "get": {
+                "description": "Retrieve a list of all available task status types with their names and values",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task-statuses"
+                ],
+                "summary": "Get all task status types",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/taskstatus.Type"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/task-statuses/{id}": {
             "get": {
                 "description": "Retrieve a single task status by its ID",
@@ -1670,6 +1871,113 @@
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/calendar": {
+            "get": {
+                "description": "Retrieve a list of tasks formatted for calendar view with date filtering",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get tasks for calendar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Section ID",
+                        "name": "section_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Assignee ID",
+                        "name": "assignee_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "start_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "end_date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Status ID",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/tasks/calendar/{id}": {
+            "get": {
+                "description": "Retrieve a single task formatted for calendar view by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get a single task for calendar",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1977,6 +2285,138 @@
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions/accept": {
+            "post": {
+                "description": "Check-in or check-out based on user's geo-location relative to branches",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Accept a user action (check-in/check-out)",
+                "parameters": [
+                    {
+                        "description": "User location data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AcceptUserActionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserActionResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions/attendance": {
+            "get": {
+                "description": "Get attendance reports for a branch within a date range (Format: d.m.Y)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get attendance reports",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Branch ID (0 for all)",
+                        "name": "branch_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "From Date (Format: d.m.Y, e.g. 24.01.2026)",
+                        "name": "from_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "To Date (Format: d.m.Y, e.g. 25.01.2026)",
+                        "name": "to_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserAttendanceResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user-actions/statuses": {
+            "get": {
+                "description": "Get a list of all possible user action statuses (ON_TIME, LATE, etc.)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-actions"
+                ],
+                "summary": "Get user action status list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.AttendanceStatusResponse"
+                            }
                         }
                     }
                 }
@@ -2349,6 +2789,95 @@
         }
     },
     "definitions": {
+        "dto.AcceptUserActionRequest": {
+            "type": "object",
+            "required": [
+                "lat",
+                "long",
+                "user_id"
+            ],
+            "properties": {
+                "lat": {
+                    "type": "number",
+                    "example": 41.311081
+                },
+                "long": {
+                    "type": "number",
+                    "example": 69.240562
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.AttachBranchRequest": {
+            "type": "object",
+            "required": [
+                "branch_id",
+                "department_id"
+            ],
+            "properties": {
+                "branch_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "department_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.AttendanceAction": {
+            "type": "object",
+            "properties": {
+                "come_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "finished_at": {
+                    "type": "integer",
+                    "example": 1737280800
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "leave_branch_id": {
+                    "type": "integer",
+                    "example": 2
+                },
+                "out_status": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "started_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "visit_branch_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "worked_time": {
+                    "type": "string",
+                    "example": "08:30"
+                }
+            }
+        },
+        "dto.AttendanceStatusResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "label": {
+                    "type": "string",
+                    "example": "O'z vaqtida"
+                }
+            }
+        },
         "dto.BranchResponse": {
             "type": "object",
             "properties": {
@@ -2563,6 +3092,14 @@
                 "section_id": {
                     "type": "integer",
                     "example": 1
+                },
+                "sort": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2647,6 +3184,31 @@
                 "tg_chat_id": {
                     "type": "integer",
                     "example": 123456789
+                }
+            }
+        },
+        "dto.DepartmentBranchResponse": {
+            "type": "object",
+            "properties": {
+                "branch_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "created_at": {
+                    "type": "integer",
+                    "example": 1737277200
+                },
+                "department_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "status": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -2995,6 +3557,14 @@
                 "section_id": {
                     "type": "integer",
                     "example": 1
+                },
+                "sort": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -3024,6 +3594,18 @@
                     "type": "integer",
                     "example": 150
                 },
+                "status": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.UpdateDepartmentBranchStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
                 "status": {
                     "type": "integer",
                     "example": 1
@@ -3184,6 +3766,14 @@
                 "section_id": {
                     "type": "integer",
                     "example": 1
+                },
+                "sort": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "type": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -3308,6 +3898,33 @@
                 }
             }
         },
+        "dto.UserAttendanceResponse": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AttendanceAction"
+                    }
+                },
+                "total_worked_time": {
+                    "type": "string",
+                    "example": "16:30"
+                },
+                "user_full_name": {
+                    "type": "string",
+                    "example": "John Doe"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_phone": {
+                    "type": "string",
+                    "example": "+998901234567"
+                }
+            }
+        },
         "dto.UserResponse": {
             "type": "object",
             "properties": {
@@ -3354,6 +3971,68 @@
                 "updated_at": {
                     "type": "integer",
                     "example": 1737277200
+                }
+            }
+        },
+        "statistics.DashboardStats": {
+            "type": "object",
+            "properties": {
+                "department_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/statistics.DepartmentStat"
+                    }
+                },
+                "task_stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/statistics.TaskStatusStat"
+                    }
+                },
+                "total_attendance": {
+                    "type": "integer"
+                },
+                "total_employees": {
+                    "type": "integer"
+                }
+            }
+        },
+        "statistics.DepartmentStat": {
+            "type": "object",
+            "properties": {
+                "employee_count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "statistics.TaskStatusStat": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "taskstatus.Type": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "integer"
                 }
             }
         }

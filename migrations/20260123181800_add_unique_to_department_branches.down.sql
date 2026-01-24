@@ -1,0 +1,1 @@
+ALTER TABLE "department_branches" DROP CONSTRAINT "unique_branch_department";

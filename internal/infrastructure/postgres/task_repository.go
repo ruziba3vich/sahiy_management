@@ -427,3 +427,128 @@ func (r *TaskRepository) GetTasksWithFilter(ctx context.Context, filter *domain.
 		TotalCount: totalCount,
 	}, nil
 }
+
+func (r *TaskRepository) GetTasksForCalendar(ctx context.Context, sectionID, assigneeID *int64, startDate, endDate string, status *int) ([]*domain.Task, error) {
+	query := `
+		SELECT 
+			t.id, t.parent_id, t.section_id, t.assignee_id, t.reviewer_id, t.title, t.description, t.priority, t.deadline, t.status, t.created_at, t.updated_at,
+			u.id, u.department_id, u.section_id, u.schedule_id, u.role, u.phone, u.full_name, u.joined_at, u.created_at, u.updated_at, u.tg_chat_id,
+			(SELECT th.started_at FROM task_histories th 
+			 JOIN task_statuses ts ON th.status = ts.id 
+			 WHERE th.task_id = t.id AND ts.status_type = 10 
+			 ORDER BY th.started_at DESC LIMIT 1) as end_date
+		FROM tasks t
+		LEFT JOIN users u ON t.assignee_id = u.id
+		WHERE 1=1
+	`
+	args := []interface{}{}
+	argCount := 0
+
+	if startDate != "" {
+		argCount++
+		query += fmt.Sprintf(" AND t.created_at >= extract(epoch from $%d::timestamp)", argCount)
+		args = append(args, startDate+" 00:00:00")
+	}
+	if endDate != "" {
+		argCount++
+		query += fmt.Sprintf(" AND t.created_at <= extract(epoch from $%d::timestamp)", argCount)
+		args = append(args, endDate+" 23:59:59")
+	}
+	if sectionID != nil {
+		argCount++
+		query += fmt.Sprintf(" AND t.section_id = $%d", argCount)
+		args = append(args, *sectionID)
+	}
+	if assigneeID != nil {
+		argCount++
+		query += fmt.Sprintf(" AND t.assignee_id = $%d", argCount)
+		args = append(args, *assigneeID)
+	}
+	if status != nil {
+		argCount++
+		query += fmt.Sprintf(" AND t.status = $%d", argCount)
+		args = append(args, *status)
+	}
+
+	query += " ORDER BY t.created_at ASC"
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []*domain.Task
+	for rows.Next() {
+		task := &domain.Task{}
+		var uID, uDepID, uSecID, uRole, uJoinedAt, uCreatedAt, uUpdatedAt, uTgChatID pgtype.Int8
+		var uSchedID pgtype.Int8
+		var uPhone, uFullName pgtype.Text
+		var endDateVal pgtype.Int8
+
+		err := rows.Scan(
+			&task.ID,
+			&task.ParentID,
+			&task.SectionID,
+			&task.AssigneeID,
+			&task.ReviewerID,
+			&task.Title,
+			&task.Description,
+			&task.Priority,
+			&task.Deadline,
+			&task.Status,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+			&uID, &uDepID, &uSecID, &uSchedID, &uRole, &uPhone, &uFullName, &uJoinedAt, &uCreatedAt, &uUpdatedAt, &uTgChatID,
+			&endDateVal,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if endDateVal.Valid {
+			task.EndDate = &endDateVal.Int64
+		}
+
+		if uID.Valid {
+			task.Assignee = &userDomain.User{
+				ID:           uID.Int64,
+				DepartmentID: uDepID.Int64,
+				SectionID:    uSecID.Int64,
+				Role:         int(uRole.Int64),
+				Phone:        uPhone.String,
+				FullName:     uFullName.String,
+				JoinedAt:     uJoinedAt.Int64,
+				CreatedAt:    uCreatedAt.Int64,
+				UpdatedAt:    uUpdatedAt.Int64,
+				TgChatID:     uTgChatID.Int64,
+			}
+			if uSchedID.Valid {
+				task.Assignee.ScheduleID = &uSchedID.Int64
+			}
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}
+
+func (r *TaskRepository) GetEndDateForTask(ctx context.Context, taskID int64) (*int64, error) {
+	query := `
+		SELECT th.started_at 
+		FROM task_histories th 
+		JOIN task_statuses ts ON th.status = ts.id 
+		WHERE th.task_id = $1 AND ts.status_type = 10 
+		ORDER BY th.started_at DESC LIMIT 1
+	`
+	var endDate int64
+	err := r.db.QueryRow(ctx, query, taskID).Scan(&endDate)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &endDate, nil
+}

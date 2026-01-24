@@ -25,3 +25,11 @@ func (d *Department) Update(name string, status int) {
 	d.Status = status
 	d.UpdatedAt = time.Now().Unix()
 }
+
+type DepartmentBranch struct {
+	ID           int64
+	BranchID     int64
+	DepartmentID int64
+	Status       int
+	CreatedAt    int64
+}

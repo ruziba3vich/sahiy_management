@@ -213,3 +213,107 @@ func (r *UserActionRepository) GetAllUserActions(ctx context.Context) ([]*domain
 
 	return actions, nil
 }
+
+func (r *UserActionRepository) GetLastActiveActionByUserID(ctx context.Context, userID int64) (*domain.UserAction, error) {
+	query := `
+		SELECT id, user_id, visit_branch_id, leave_branch_id, come_status, out_status, started_at, finished_at
+		FROM user_actions
+		WHERE user_id = $1 AND finished_at IS NULL
+		ORDER BY started_at DESC
+		LIMIT 1
+	`
+
+	action := &domain.UserAction{}
+	var leaveBranchID sql.NullInt64
+	var outStatus sql.NullInt64
+	var finishedAt sql.NullInt64
+
+	err := r.db.QueryRow(ctx, query, userID).Scan(
+		&action.ID,
+		&action.UserID,
+		&action.VisitBranchID,
+		&leaveBranchID,
+		&action.ComeStatus,
+		&outStatus,
+		&action.StartedAt,
+		&finishedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserActionNotFound
+		}
+		return nil, err
+	}
+
+	if leaveBranchID.Valid {
+		action.LeaveBranchID = &leaveBranchID.Int64
+	}
+	if outStatus.Valid {
+		value := int(outStatus.Int64)
+		action.OutStatus = &value
+	}
+	if finishedAt.Valid {
+		action.FinishedAt = &finishedAt.Int64
+	}
+
+	return action, nil
+}
+
+func (r *UserActionRepository) GetAttendance(ctx context.Context, branchID int64, fromDate, toDate int64) ([]*domain.AttendanceRecord, error) {
+	query := `
+		SELECT 
+			ua.id, ua.user_id, ua.visit_branch_id, ua.leave_branch_id, 
+			ua.come_status, ua.out_status, ua.started_at, ua.finished_at,
+			u.full_name, u.phone
+		FROM user_actions ua
+		JOIN users u ON ua.user_id = u.id
+		WHERE ($1 = 0 OR ua.visit_branch_id = $1)
+		  AND (ua.started_at >= $2 AND ua.started_at <= $3)
+		ORDER BY ua.started_at DESC
+	`
+
+	rows, err := r.db.Query(ctx, query, branchID, fromDate, toDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []*domain.AttendanceRecord
+	for rows.Next() {
+		record := &domain.AttendanceRecord{}
+		var leaveBranchID sql.NullInt64
+		var outStatus sql.NullInt64
+		var finishedAt sql.NullInt64
+
+		err := rows.Scan(
+			&record.ID,
+			&record.UserID,
+			&record.VisitBranchID,
+			&leaveBranchID,
+			&record.ComeStatus,
+			&outStatus,
+			&record.StartedAt,
+			&finishedAt,
+			&record.UserFullName,
+			&record.UserPhone,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if leaveBranchID.Valid {
+			record.LeaveBranchID = &leaveBranchID.Int64
+		}
+		if outStatus.Valid {
+			value := int(outStatus.Int64)
+			record.OutStatus = &value
+		}
+		if finishedAt.Valid {
+			record.FinishedAt = &finishedAt.Int64
+		}
+
+		records = append(records, record)
+	}
+
+	return records, nil
+}
